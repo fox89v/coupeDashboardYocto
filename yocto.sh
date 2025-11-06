@@ -29,62 +29,8 @@ check_deps() {
     echo "✅ All required packages are installed."
   fi
 }
+
 check_deps
-
-# ────────────────────────────────────────────────
-# 🧱 Auto-create meta-sa layer if missing
-# ────────────────────────────────────────────────
-if [ ! -d "meta-sa" ]; then
-  echo "📦 Creating meta-sa layer..."
-  mkdir -p meta-sa/{conf,recipes-core/images}
-
-  # layer.conf
-  cat > meta-sa/conf/layer.conf <<'EOF'
-# meta-sa layer
-BBPATH .= ":${LAYERDIR}"
-BBFILES += "${LAYERDIR}/recipes-*/*/*.bb"
-
-BBFILE_COLLECTIONS += "meta-sa"
-BBFILE_PATTERN_meta-sa := "^${LAYERDIR}/"
-BBFILE_PRIORITY_meta-sa = "7"
-
-LAYERSERIES_COMPAT_meta-sa = "scarthgap"
-EOF
-
-  # sa-image-minimal.bb (autologin root)
-  cat > meta-sa/recipes-core/images/sa-image-minimal.bb <<'EOF'
-SUMMARY = "Minimal image with root autologin"
-LICENSE = "MIT"
-
-inherit core-image
-
-IMAGE_FEATURES += "splash package-management debug-tweaks"
-
-IMAGE_INSTALL += " \
-    busybox \
-    base-files \
-    base-passwd \
-    netbase \
-    dropbear \
-"
-
-# Enable root autologin on serial console
-ROOTFS_POSTPROCESS_COMMAND += "enable_root_autologin; "
-
-enable_root_autologin() {
-    mkdir -p ${IMAGE_ROOTFS}/etc/systemd/system/serial-getty@ttyAMA0.service.d
-    cat << 'EOT' > ${IMAGE_ROOTFS}/etc/systemd/system/serial-getty@ttyAMA0.service.d/autologin.conf
-[Service]
-ExecStart=
-ExecStart=-/sbin/agetty --autologin root --noclear %I $TERM
-EOT
-}
-
-IMAGE_LINGUAS = "en-us"
-EOF
-
-  echo "✅ meta-sa layer created with root autologin."
-fi
 
 # ────────────────────────────────────────────────
 # 🚀 Main menu
@@ -96,7 +42,8 @@ echo "1) Configure project"
 echo "2) Build custom image"
 echo "3) Run QEMU (only qemuarm64)"
 echo "4) Build SDK (toolchain)"
-read -rp "Choice [1-4]: " main_choice
+echo "5) Install SDK (toolchain)"
+read -rp "Choice [1-5]: " main_choice
 
 # ────────────────────────────────────────────────
 # 1️⃣ Configure project
@@ -112,7 +59,7 @@ if [ "$main_choice" = "1" ]; then
 fi
 
 # ────────────────────────────────────────────────
-# 2️⃣ Select target
+# 2️⃣ Select target (for build & SDK only)
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "2" ] || [ "$main_choice" = "4" ]; then
   echo ""
@@ -129,46 +76,11 @@ if [ "$main_choice" = "2" ] || [ "$main_choice" = "4" ]; then
 fi
 
 # ────────────────────────────────────────────────
-# 3️⃣ Generate conf if missing
+# 3️⃣ Init build env with TEMPLATECONF (auto configs)
 # ────────────────────────────────────────────────
 if [ -n "$BUILDDIR" ]; then
-  CONF_DIR="$BUILDDIR/conf"
-  if [ ! -f "$CONF_DIR/bblayers.conf" ]; then
-    echo "🧩 Generating default conf for $MACHINE..."
-    mkdir -p "$CONF_DIR"
-
-    cat >"$CONF_DIR/bblayers.conf"<<EOF
-BBLAYERS ?= " \
-  \${TOPDIR}/../meta-sa \
-  \${TOPDIR}/../meta-openembedded/meta-oe \
-  \${TOPDIR}/../meta-openembedded/meta-networking \
-  \${TOPDIR}/../meta-openembedded/meta-python \
-  \${TOPDIR}/../meta-raspberrypi \
-  \${TOPDIR}/../poky/meta \
-  \${TOPDIR}/../poky/meta-poky \
-  \${TOPDIR}/../poky/meta-yocto-bsp \
-"
-EOF
-
-    cat >"$CONF_DIR/local.conf"<<EOF
-MACHINE = "$MACHINE"
-PACKAGE_CLASSES = "package_ipk"
-BB_NUMBER_THREADS = "4"
-PARALLEL_MAKE = "-j4"
-TCLIBC = "musl"
-DISTRO_FEATURES = "opengl egl kms"
-SSTATE_DIR ?= "\${TOPDIR}/../sstate-cache"
-DL_DIR ?= "\${TOPDIR}/../downloads"
-INHERIT += "rm_work"
-EOF
-  fi
-fi
-
-# ────────────────────────────────────────────────
-# 4️⃣ Init build env and add layers
-# ────────────────────────────────────────────────
-if [ -n "$BUILDDIR" ]; then
-  source poky/oe-init-build-env "$BUILDDIR"
+  echo "🧩 Preparing build environment for $MACHINE..."
+  TEMPLATECONF="../meta-sa/conf/templates/default" source poky/oe-init-build-env "$BUILDDIR"
 
   for layer in \
     ../meta-openembedded/meta-oe \
@@ -184,7 +96,7 @@ if [ -n "$BUILDDIR" ]; then
 fi
 
 # ────────────────────────────────────────────────
-# 5️⃣ Build image
+# 4️⃣ Build image
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "2" ]; then
   read -rp "Limit CPU usage with cpulimit? [y/N]: " limit_cpu
@@ -194,7 +106,7 @@ if [ "$main_choice" = "2" ]; then
     USE_CPULIMIT=true
   fi
 
-  echo "🛠️  Building custom image (sa-image-minimal) for $MACHINE..."
+  echo "🛠️  Building image for $MACHINE..."
   TARGET="sa-image-minimal"
   if [ "$USE_CPULIMIT" = true ]; then
     nice -n 10 cpulimit -l "$CPU_PERCENT" -- bitbake "$TARGET"
@@ -206,11 +118,11 @@ if [ "$main_choice" = "2" ]; then
 fi
 
 # ────────────────────────────────────────────────
-# 6️⃣ Run QEMU (musl path fix)
+# 5️⃣ Run QEMU (fixed musl path)
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "3" ]; then
   echo "🖥️  Preparing QEMU environment (qemuarm64)..."
-  source poky/oe-init-build-env build-qemu
+  TEMPLATECONF="../meta-sa/conf/templates" source poky/oe-init-build-env build-qemu
 
   IMG_DIR="../build-qemu/tmp-musl/deploy/images/qemuarm64"
 
@@ -234,7 +146,7 @@ if [ "$main_choice" = "3" ]; then
 fi
 
 # ────────────────────────────────────────────────
-# 7️⃣ Build SDK
+# 6️⃣ Build SDK
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "4" ]; then
   echo "🧰 Building SDK for $MACHINE..."
@@ -242,7 +154,55 @@ if [ "$main_choice" = "4" ]; then
   echo ""
   echo "✅ SDK generated!"
   echo "   You can find it in: $IMG_PATH/"
-  echo "   Install it with:"
-  echo "   sudo sh tmp/deploy/sdk/*.sh"
+  echo "   Install it with option [5]"
+  exit 0
+fi
+
+# ────────────────────────────────────────────────
+# 7️⃣ Install SDKs (auto → /opt/coupe-sdk)
+# ────────────────────────────────────────────────
+if [ "$main_choice" = "5" ]; then
+  INSTALL_DIR="/opt/coupe-sdk"
+
+  echo ""
+  echo "📦 SDK Installer → $INSTALL_DIR"
+  echo "──────────────────────────────"
+
+  if [ ! -d "$INSTALL_DIR" ]; then
+    echo "ℹ️  Creating $INSTALL_DIR..."
+    if ! mkdir -p "$INSTALL_DIR" 2>/dev/null; then
+      echo "⚠️  Cannot create $INSTALL_DIR"
+      echo "   Try running with sudo or choose another path."
+      exit 1
+    fi
+  elif [ ! -w "$INSTALL_DIR" ]; then
+    echo "⚠️  No write access to $INSTALL_DIR"
+    echo "   Try running with sudo or choose another path."
+    exit 1
+  fi
+
+  SDKS=()
+  while IFS= read -r f; do SDKS+=("$f"); done < <(find build-qemu/tmp-musl/deploy/sdk -name "*.sh" 2>/dev/null || true)
+  while IFS= read -r f; do SDKS+=("$f"); done < <(find build-rpi4/tmp-musl/deploy/sdk -name "*.sh" 2>/dev/null || true)
+
+  if [ ${#SDKS[@]} -eq 0 ]; then
+    echo "❌ No SDK installers found. Build them first with option [4]."
+    exit 1
+  fi
+
+  echo "Found:"
+  for s in "${SDKS[@]}"; do echo "  - $s"; done
+  echo ""
+  echo "➡️  Installing all SDKs into $INSTALL_DIR..."
+
+  for s in "${SDKS[@]}"; do
+    echo "→ Installing $s"
+    sh "$s" -d "$INSTALL_DIR" -y
+  done
+
+  echo ""
+  echo "✅ SDKs installed in: $INSTALL_DIR"
+  echo "Activate (QEMU/RPi4):"
+  echo "  source $INSTALL_DIR/*/environment-setup-aarch64-oe-linux"
   exit 0
 fi
