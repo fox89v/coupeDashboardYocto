@@ -46,7 +46,7 @@ echo "5) Install SDK (toolchain)"
 read -rp "Choice [1-5]: " main_choice
 
 # ────────────────────────────────────────────────
-# 1️⃣ Configure project
+# 1️⃣ Configure project (clone layers)
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "1" ]; then
   echo "🧩 Setting up repositories..."
@@ -59,7 +59,7 @@ if [ "$main_choice" = "1" ]; then
 fi
 
 # ────────────────────────────────────────────────
-# 2️⃣ Select target (for build & SDK only)
+# 2️⃣ Select target (for build & SDK)
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "2" ] || [ "$main_choice" = "4" ]; then
   echo ""
@@ -76,12 +76,13 @@ if [ "$main_choice" = "2" ] || [ "$main_choice" = "4" ]; then
 fi
 
 # ────────────────────────────────────────────────
-# 3️⃣ Init build env with TEMPLATECONF (auto configs)
+# 3️⃣ Init build env (via TEMPLATECONF=default)
 # ────────────────────────────────────────────────
 if [ -n "$BUILDDIR" ]; then
   echo "🧩 Preparing build environment for $MACHINE..."
   TEMPLATECONF="../meta-sa/conf/templates/default" source poky/oe-init-build-env "$BUILDDIR"
 
+  # Add layers if missing
   for layer in \
     ../meta-openembedded/meta-oe \
     ../meta-openembedded/meta-networking \
@@ -118,35 +119,72 @@ if [ "$main_choice" = "2" ]; then
 fi
 
 # ────────────────────────────────────────────────
-# 5️⃣ Run QEMU (fixed musl path)
+# 5️⃣ Run QEMU (direct, no runqemu)
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "3" ]; then
-  echo "🖥️  Preparing QEMU environment (qemuarm64)..."
-  TEMPLATECONF="../meta-sa/conf/templates" source poky/oe-init-build-env build-qemu
+  echo "🖥️  Run QEMU (direct mode, SDL)…"
 
-  IMG_DIR="../build-qemu/tmp-musl/deploy/images/qemuarm64"
-
-  if [ ! -d "$IMG_DIR" ]; then
-    echo "❌ No QEMU image found!"
-    echo "   You need to build it first with option [2]"
+  # prendi l'ultimo .qemuboot.conf generato
+  CONF=$(ls -1 build-qemu/tmp-musl/deploy/images/qemuarm64/*.qemuboot.conf 2>/dev/null | tail -n 1 || true)
+  if [ -z "$CONF" ] || [ ! -f "$CONF" ]; then
+    echo "❌ No .qemuboot.conf found. Build QEMU image first (menu → 2 → QEMU)."
     exit 1
   fi
 
-  IMG_FILE=$(find "$IMG_DIR" -type f -name "*.qemuboot.conf" | head -n 1)
-  if [ -z "$IMG_FILE" ]; then
-    echo "❌ No valid QEMU boot config (.qemuboot.conf) found in $IMG_DIR"
+  echo "📄 Using: $CONF"
+  IMG_DIR="$(dirname "$CONF")"
+
+  # helper per leggere "chiave = valore"
+  getv() { grep -E "^$1[[:space:]]*=" "$CONF" | sed 's/^[^=]*=\s*//'; }
+
+  KERNEL_IMG="$(getv kernel_imagetype)"
+  IMG_NAME="$(getv image_name)"
+  MEM="$(getv qb_mem)"
+  CPU_OPT="$(getv qb_cpu)"
+  MACH_OPT="$(getv QB_MACHINE)"
+  GPU_OPT="$(getv qb_graphics)"
+  # se vuoi forzare SDL: metti qui la tua policy display
+  DISPLAY_OPT="-display sdl,gl=off,show-cursor=on"
+
+  # fallback sensati
+  [ -z "$KERNEL_IMG" ] && KERNEL_IMG="Image"
+  [ -z "$MEM" ] && MEM="1024"
+  [ -z "$CPU_OPT" ] && CPU_OPT="cortex-a72"
+  [[ "$CPU_OPT" == -cpu* ]] || CPU_OPT="-cpu $CPU_OPT"
+  [[ "$MACH_OPT" == -machine* ]] || MACH_OPT="-machine virt"
+  [[ "$GPU_OPT" == -device* ]] || GPU_OPT="-device virtio-gpu-pci"
+
+  KERNEL_PATH="$IMG_DIR/$KERNEL_IMG"
+  ROOTFS_PATH="$IMG_DIR/$IMG_NAME.ext4"
+
+  if [ ! -f "$KERNEL_PATH" ]; then
+    echo "❌ Kernel not found: $KERNEL_PATH"
+    exit 1
+  fi
+  if [ ! -f "$ROOTFS_PATH" ]; then
+    echo "❌ Rootfs not found: $ROOTFS_PATH"
     exit 1
   fi
 
-  echo "✅ Found image: $(basename "$IMG_FILE")"
-  echo "💻 Launching QEMU (nographic + slirp)..."
-  echo "💡 Tip: press Ctrl+A, X to quit QEMU."
-  runqemu qemuarm64 nographic slirp "$IMG_FILE"
-  exit 0
+  echo "🚀 Launching qemu-system-aarch64…"
+  set -x
+  exec qemu-system-aarch64 \
+    $MACH_OPT \
+    $CPU_OPT \
+    -m "$MEM" \
+    -smp 4 \
+    -kernel "$KERNEL_PATH" \
+    -drive if=virtio,format=raw,file="$ROOTFS_PATH" \
+    -append "root=/dev/vda rw console=ttyAMA0" \
+    $GPU_OPT \
+    $DISPLAY_OPT \
+    -device qemu-xhci -device usb-tablet -device usb-kbd \
+    -netdev user,id=net0,hostfwd=tcp::2222-:22 -device virtio-net-pci,netdev=net0
 fi
 
+
 # ────────────────────────────────────────────────
-# 6️⃣ Build SDK
+# 6️⃣ Build SDK (for selected target)
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "4" ]; then
   echo "🧰 Building SDK for $MACHINE..."
@@ -159,7 +197,7 @@ if [ "$main_choice" = "4" ]; then
 fi
 
 # ────────────────────────────────────────────────
-# 7️⃣ Install SDKs (auto → /opt/coupe-sdk)
+# 7️⃣ Install SDKs (default → /opt/coupe-sdk)
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "5" ]; then
   INSTALL_DIR="/opt/coupe-sdk"

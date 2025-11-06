@@ -1,13 +1,25 @@
 MACHINE ?= "qemuarm64"
 PACKAGE_CLASSES = "package_ipk"
+
+# Usa tutti i core disponibili per build veloci
 BB_NUMBER_THREADS ?= "${@oe.utils.cpu_count()}"
 PARALLEL_MAKE ?= "-j ${@oe.utils.cpu_count()}"
+
+# libc leggera
 TCLIBC = "musl"
-DISTRO_FEATURES = "opengl egl kms"
+
+# Abilita grafica, OpenGL, e Wayland/EGLFS
+DISTRO_FEATURES:append = " opengl egl kms wayland"
+
+# Attiva SDL per QEMU (grafica)
+PACKAGECONFIG:append_pn-qemu-native = " sdl"
+
+# Cache condivisa per evitare rebuild inutili
 SSTATE_DIR ?= "${TOPDIR}/../sstate-cache"
 DL_DIR ?= "${TOPDIR}/../downloads"
+
+# Pulisce file intermedi dopo build
 INHERIT += "rm_work"
 
-# Allow Raspberry Pi proprietary firmware
+# Consenti licenze limitate (necessario per firmware RPi)
 LICENSE_FLAGS_ACCEPTED += "synaptics-killswitch"
-LICENSE_FLAGS_ACCEPTED = "synaptics-killswitch"
