@@ -1,25 +1,38 @@
 MACHINE ?= "qemuarm64"
 PACKAGE_CLASSES = "package_ipk"
 
-# Usa tutti i core disponibili per build veloci
+# 🧠 usa tutti i core disponibili per la build
 BB_NUMBER_THREADS ?= "${@oe.utils.cpu_count()}"
-PARALLEL_MAKE ?= "-j ${@oe.utils.cpu_count()}"
+PARALLEL_MAKE ?= "-j${@oe.utils.cpu_count()}"
 
-# libc leggera
+# 🧩 libc leggera
 TCLIBC = "musl"
 
-# Abilita grafica, OpenGL, e Wayland/EGLFS
-DISTRO_FEATURES:append = " opengl egl kms wayland"
+# 🧱 features minime ma con EGLFS
+DISTRO_FEATURES = "opengl egl kms"
+DISTRO_FEATURES:remove = "x11 wayland nfs bluetooth wifi systemd-boot"
 
-# Attiva SDL per QEMU (grafica)
-PACKAGECONFIG:append_pn-qemu-native = " sdl"
+# 💨 niente splash, niente package-management
+IMAGE_FEATURES = ""
+IMAGE_FEATURES:remove = "splash package-management debug-tweaks"
 
-# Cache condivisa per evitare rebuild inutili
+# ⚙️ console silenziosa e boot rapido
+APPEND += "quiet loglevel=0 vt.global_cursor_default=0"
+SERIAL_CONSOLE = "115200;ttyAMA0"
+QUIET_CONSOLE = "1"
+
+# 🧹 disabilita logging persistente e roba inutile
+VOLATILE_LOG_DIR = "yes"
+
+# 🧰 cache condivisa
 SSTATE_DIR ?= "${TOPDIR}/../sstate-cache"
 DL_DIR ?= "${TOPDIR}/../downloads"
 
-# Pulisce file intermedi dopo build
+# 🔧 pulizia post-build
 INHERIT += "rm_work"
 
-# Consenti licenze limitate (necessario per firmware RPi)
+# ⚠️ accetta licenze proprietarie (firmware RPi)
 LICENSE_FLAGS_ACCEPTED += "synaptics-killswitch"
+
+# 🧩 QEMU SDL (solo per test grafici)
+PACKAGECONFIG:append_pn-qemu-native = " sdl"

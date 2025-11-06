@@ -1,49 +1,33 @@
-SUMMARY = "Minimal image with root autologin + EGL test"
+SUMMARY = "Minimal image (fast boot, EGL test, autostart)"
 LICENSE = "MIT"
 
 inherit core-image
 
 # ────────────────────────────────────────────────
-# 🧩 Base image setup
+# 🧩 Base image — essenziale e veloce
 # ────────────────────────────────────────────────
-IMAGE_FEATURES += "splash package-management debug-tweaks"
+IMAGE_FEATURES = ""
+IMAGE_FEATURES:remove = "splash package-management debug-tweaks"
 
-IMAGE_INSTALL += " \
+IMAGE_INSTALL = " \
     busybox \
     base-files \
     base-passwd \
     netbase \
+    udev \
     dropbear \
+    egltest \
+    mesa \
+    kmscube \
 "
 
 IMAGE_LINGUAS = "en-us"
 
 # ────────────────────────────────────────────────
-# 👤 Enable root autologin on serial console
+# 🧾 Info EGL (opzionale)
 # ────────────────────────────────────────────────
-ROOTFS_POSTPROCESS_COMMAND += "enable_root_autologin; egl_check_install; "
+ROOTFS_POSTPROCESS_COMMAND += "egl_check_install; "
 
-enable_root_autologin() {
-    mkdir -p ${IMAGE_ROOTFS}/etc/systemd/system/serial-getty@ttyAMA0.service.d
-    cat << 'EOT' > ${IMAGE_ROOTFS}/etc/systemd/system/serial-getty@ttyAMA0.service.d/autologin.conf
-[Service]
-ExecStart=
-ExecStart=-/sbin/agetty --autologin root --noclear %I $TERM
-EOT
-}
-
-# ────────────────────────────────────────────────
-# 🧠 Add EGL/OpenGL test tools
-# ────────────────────────────────────────────────
-IMAGE_INSTALL:append = " \
-    egltest \
-    mesa \
-    mesa-dev \
-    kmscube \
-"
-# ────────────────────────────────────────────────
-# 🧾 Auto EGL info on login
-# ────────────────────────────────────────────────
 egl_check_install() {
     install -d ${IMAGE_ROOTFS}/etc/profile.d
     cat << 'EOF' > ${IMAGE_ROOTFS}/etc/profile.d/eglcheck.sh
@@ -56,26 +40,40 @@ EOF
     chmod +x ${IMAGE_ROOTFS}/etc/profile.d/eglcheck.sh
 }
 
+
 # ────────────────────────────────────────────────
-# 🧩 QEMU boot tuning — emulate Pi4-like system
+# ⚙️ QEMU tuning (emulazione Pi4)
 # ────────────────────────────────────────────────
 QB_SYSTEM_NAME = "qemu-system-aarch64"
 QB_MACHINE = "virt"
 QB_CPU = "cortex-a72"
 QB_MEM = "1024"
-
-# enable GPU and SDL window (software rendered)
 QB_DISPLAY_OPT = "-device virtio-gpu-pci -display sdl"
-
-# enable USB + tablet input (mouse)
 QB_USB_OPT = "-device qemu-xhci -device usb-tablet -device usb-kbd"
-
-# networking with slirp (no tap needed)
 QB_NETWORK_DEVICE = "virtio-net-pci"
 QB_NET_OPT = "-netdev user,id=net0,hostfwd=tcp::2222-:22 -device virtio-net-pci,netdev=net0"
-
-# rootfs append string
-QB_KERNEL_CMDLINE_APPEND = "console=ttyAMA0 root=/dev/vda rw mem=1024M net.ifnames=0"
-
-# use virtio block for rootfs
 QB_DRIVE_TYPE = "virtio"
+QB_KERNEL_CMDLINE_APPEND = "console=ttyAMA0 console=tty0 root=/dev/vda rw mem=1024M net.ifnames=0 quiet loglevel=0 vt.global_cursor_default=0"
+
+# ────────────────────────────────────────────────
+# 🚀 Boot diretto in kmscube (senza systemd)
+# ────────────────────────────────────────────────
+ROOTFS_POSTPROCESS_COMMAND += "replace_init_with_kmscube; "
+
+replace_init_with_kmscube() {
+    # rinomina systemd per sicurezza
+    mv ${IMAGE_ROOTFS}/sbin/init ${IMAGE_ROOTFS}/sbin/init.orig || true
+
+    # crea init minimale che lancia kmscube
+    cat << 'EOF' > ${IMAGE_ROOTFS}/sbin/init
+#!/bin/sh
+mount -t proc none /proc
+mount -t sysfs none /sys
+mount -t devtmpfs none /dev
+echo "🚀 Starting kmscube..."
+/usr/bin/kmscube
+echo "💀 kmscube exited, dropping to shell"
+/bin/sh
+EOF
+    chmod +x ${IMAGE_ROOTFS}/sbin/init
+}
