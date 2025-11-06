@@ -45,9 +45,7 @@ echo "4) Build SDK (toolchain)"
 echo "5) Install SDK (toolchain)"
 read -rp "Choice [1-5]: " main_choice
 
-# ────────────────────────────────────────────────
 # 1️⃣ Configure project (clone layers)
-# ────────────────────────────────────────────────
 if [ "$main_choice" = "1" ]; then
   echo "🧩 Setting up repositories..."
 
@@ -58,15 +56,7 @@ if [ "$main_choice" = "1" ]; then
 
   mkdir -p downloads sstate-cache
 
-  echo ""
-  echo "✅ Setup complete!"
-  echo "   Layers cloned:"
-  echo "   - poky"
-  echo "   - meta-openembedded"
-  echo "   - meta-raspberrypi"
-  echo "   - meta-qt6"
-  echo ""
-  echo "Next: run option [2] to build your image."
+  echo -e "\n✅ Setup complete!\n   Layers cloned:\n   - poky\n   - meta-openembedded\n   - meta-raspberrypi\n   - meta-qt6\n\nNext: run option [2] to build your image."
   exit 0
 fi
 
