@@ -5,6 +5,27 @@ PACKAGE_CLASSES = "package_ipk"
 BB_NUMBER_THREADS ?= "${@oe.utils.cpu_count()}"
 PARALLEL_MAKE ?= "-j${@oe.utils.cpu_count()}"
 
+# Mirror alternativi
+# ── Mirrors robusti (coppie: pattern -> mirror) ─────────────────
+INHERIT += "own-mirrors"
+SOURCE_MIRROR_URL = "http://mirror.yoctoproject.org/sources/"
+
+MIRRORS = "\
+    git://.*/.*            http://mirror.yoctoproject.org/sources/ \n \
+    ftp://.*/.*            http://mirror.yoctoproject.org/sources/ \n \
+    http://.*/.*           http://mirror.yoctoproject.org/sources/ \n \
+    https://.*/.*          http://mirror.yoctoproject.org/sources/ \n \
+    http://download.savannah.gnu.org/releases/  http://mirror.yoctoproject.org/sources/ \n \
+    https://download.savannah.gnu.org/releases/ http://mirror.yoctoproject.org/sources/ \n \
+    http://ftp.gnu.org/gnu/    http://mirror.yoctoproject.org/sources/ \n \
+    https://ftp.gnu.org/gnu/   http://mirror.yoctoproject.org/sources/ \n \
+    http://fontconfig.org/release/  http://mirror.yoctoproject.org/sources/ \n \
+    https://cdn.kernel.org/         http://mirror.yoctoproject.org/sources/ \n \
+    http://www.thrysoee.dk/editline/ http://mirror.yoctoproject.org/sources/ \n \
+"
+
+
+
 # 🧩 libc leggera
 TCLIBC = "musl"
 
@@ -43,3 +64,4 @@ PACKAGECONFIG:append_pn-qemu-native = " sdl"
 DISTRO_FEATURES:append = " opengl egl"
 DISTRO_FEATURES:remove = " x11 wayland"
 PACKAGECONFIG:append_pn-qtbase = " gles2 eglfs"
+

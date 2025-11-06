@@ -70,7 +70,6 @@ if [ "$main_choice" = "1" ]; then
   exit 0
 fi
 
-
 # ────────────────────────────────────────────────
 # 2️⃣ Select target (for build & SDK)
 # ────────────────────────────────────────────────
@@ -82,9 +81,20 @@ if [ "$main_choice" = "2" ] || [ "$main_choice" = "4" ]; then
   read -rp "Choice [1/2]: " choice
 
   case "$choice" in
-    1) MACHINE="qemuarm64"; BUILDDIR="build-qemu"; IMG_PATH="tmp/deploy/images/qemuarm64";;
-    2) MACHINE="raspberrypi4-64"; BUILDDIR="build-rpi4"; IMG_PATH="tmp/deploy/images/raspberrypi4-64";;
-    *) echo "❌ Invalid choice"; exit 1;;
+    1)
+      export MACHINE="qemuarm64"
+      BUILDDIR="build-qemu"
+      IMG_PATH="tmp/deploy/images/qemuarm64"
+      ;;
+    2)
+      export MACHINE="raspberrypi4-64"
+      BUILDDIR="build-rpi4"
+      IMG_PATH="tmp/deploy/images/raspberrypi4-64"
+      ;;
+    *)
+      echo "❌ Invalid choice"
+      exit 1
+      ;;
   esac
 fi
 
@@ -93,9 +103,12 @@ fi
 # ────────────────────────────────────────────────
 if [ -n "$BUILDDIR" ]; then
   echo "🧩 Preparing build environment for $MACHINE..."
-  TEMPLATECONF="../meta-sa/conf/templates/default" source poky/oe-init-build-env "$BUILDDIR"
+  export TEMPLATECONF="../meta-sa/conf/templates/default"
 
-  # Add layers if missing
+  # 👉 il MACHINE viene esportato PRIMA di chiamare oe-init-build-env
+  MACHINE="$MACHINE" TEMPLATECONF="$TEMPLATECONF" source poky/oe-init-build-env "$BUILDDIR"
+
+  # 🔧 verifica e aggiungi i layer mancanti
   for layer in \
     ../meta-openembedded/meta-oe \
     ../meta-openembedded/meta-networking \
@@ -109,6 +122,7 @@ if [ -n "$BUILDDIR" ]; then
     fi
   done
 fi
+
 
 # ────────────────────────────────────────────────
 # 4️⃣ Build image
