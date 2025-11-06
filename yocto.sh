@@ -50,13 +50,26 @@ read -rp "Choice [1-5]: " main_choice
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "1" ]; then
   echo "🧩 Setting up repositories..."
+
   [ -d poky ] || git clone -b scarthgap https://git.yoctoproject.org/poky poky
   [ -d meta-openembedded ] || git clone -b scarthgap https://git.openembedded.org/meta-openembedded meta-openembedded
   [ -d meta-raspberrypi ] || git clone -b scarthgap https://github.com/agherzan/meta-raspberrypi meta-raspberrypi
+  [ -d meta-qt6 ] || git clone -b 6.7 https://code.qt.io/yocto/meta-qt6.git meta-qt6
+
   mkdir -p downloads sstate-cache
+
+  echo ""
   echo "✅ Setup complete!"
+  echo "   Layers cloned:"
+  echo "   - poky"
+  echo "   - meta-openembedded"
+  echo "   - meta-raspberrypi"
+  echo "   - meta-qt6"
+  echo ""
+  echo "Next: run option [2] to build your image."
   exit 0
 fi
+
 
 # ────────────────────────────────────────────────
 # 2️⃣ Select target (for build & SDK)
@@ -88,6 +101,7 @@ if [ -n "$BUILDDIR" ]; then
     ../meta-openembedded/meta-networking \
     ../meta-openembedded/meta-python \
     ../meta-raspberrypi \
+    ../meta-qt6 \
     ../meta-sa; do
     if ! bitbake-layers show-layers | grep -q "$(basename "$layer")"; then
       echo "➡️  Adding layer: $layer"

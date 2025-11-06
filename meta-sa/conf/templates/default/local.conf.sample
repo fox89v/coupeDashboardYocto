@@ -36,3 +36,10 @@ LICENSE_FLAGS_ACCEPTED += "synaptics-killswitch"
 
 # 🧩 QEMU SDL (solo per test grafici)
 PACKAGECONFIG:append_pn-qemu-native = " sdl"
+
+# ────────────────────────────────────────────────
+# 🧠 Qt base (solo core + EGLFS)
+# ────────────────────────────────────────────────
+DISTRO_FEATURES:append = " opengl egl"
+DISTRO_FEATURES:remove = " x11 wayland"
+PACKAGECONFIG:append_pn-qtbase = " gles2 eglfs"
