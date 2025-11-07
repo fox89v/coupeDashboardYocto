@@ -1,97 +1,110 @@
-# 🧱 Yocto Builder
+# 🚗 Open Coupé Lab — Embedded Platform & Yocto Builder
 
 [![License](https://img.shields.io/badge/License-MIT-blue)]()  
 [![Platform](https://img.shields.io/badge/Platform-Linux-lightgrey)]()  
-[![Language](https://img.shields.io/badge/Written%20in-Bash-orange)]()  
-
-Minimal interactive environment to build and run **Yocto images** for **Raspberry Pi 4** and **QEMU ARM64**.
-
----
-
-## 🚀 Overview
-
-This repository provides a **stand-alone shell script (`yocto.sh`)** that automates Yocto setup, build, and testing.  
-It clones the required layers, configures the environment, builds a minimal custom image, and can directly run it in QEMU.
+[![Target](https://img.shields.io/badge/Target-Raspberry%20Pi%204%20%7C%20CM5-orange)]()  
+[![Language](https://img.shields.io/badge/Written%20in-Bash-green)]()  
 
 ---
 
-## ⚙️ Features
+## 🪩 Panoramica
 
-- ✅ Host dependency check  
-- 🧩 Automatic layer setup (`poky`, `meta-openembedded`, `meta-raspberrypi`)  
-- 🪄 Automatic creation of a minimal `meta-sa` layer if missing  
-- 🏗️ Build of a lightweight image (`sa-image-minimal`)  
-- 💽 Direct QEMU boot (ARM64, headless)  
-- 🧰 SDK generation via `populate_sdk`
+Questo repository unisce due componenti principali:
 
----
+1. **Yocto Builder** — ambiente interattivo minimale per generare immagini Linux embedded su Raspberry Pi 4 e Compute Module 5.  
+2. **Open Coupé Lab** — iniziativa no-profit dedicata allo sviluppo open-source di sistemi elettronici e software per la Fiat Coupé e altri veicoli d’epoca.
 
-## 🧩 Requirements
-
-Linux host (Ubuntu/Debian recommended):
-
-```bash
-sudo apt update
-sudo apt install -y git gawk wget diffstat unzip texinfo gcc g++ make cmake chrpath cpio python3 python3-pip python3-pexpect xz-utils debianutils iputils-ping libsdl1.2-dev xterm qemu-system-arm qemu-user-static cpulimit
-```
+Il laboratorio Open Coupé Lab utilizzerà questa toolchain come base per costruire **dashboard digitali, moduli sensori e strumenti di telemetria** completamente open-source.
 
 ---
 
-## 💡 Usage
+## ⚙️ Yocto Builder
 
-Clone or download this repository and run:
+### ✅ Funzionalità principali
+
+- Setup automatico dei layer (`poky`, `meta-openembedded`, `meta-raspberrypi`, `meta-qt6`, `meta-sa`)  
+- Costruzione di immagini personalizzate (`sa-image-minimal`)  
+- Esecuzione diretta in **QEMU** (ARM64)  
+- Supporto a **Raspberry Pi 4 / CM5**  
+- Generazione e installazione di SDK cross-compile
+
+### 💡 Utilizzo
 
 ```bash
 chmod +x yocto.sh
 ./yocto.sh
 ```
 
-### Interactive Menu
-
-| Option | Description |
-|:------:|:-------------|
-| 1️⃣ | Configure project (clone & prepare layers) |
-| 2️⃣ | Build custom image (`sa-image-minimal`) |
-| 3️⃣ | Run QEMU (if image exists) |
-| 4️⃣ | Build SDK (`populate_sdk`) |
-| 5️⃣ | Exit |
+Menu interattivo:
+| Opzione | Descrizione |
+|:--------:|:------------|
+| 1️⃣ | Clona e configura i layer necessari |
+| 2️⃣ | Compila l’immagine custom |
+| 3️⃣ | Avvia QEMU (emulazione ARM64) |
+| 4️⃣ | Crea SDK |
+| 5️⃣ | Installa SDK in `/opt/coupe-sdk` |
 
 ---
 
-## 📁 Directory Structure
+## 🧱 Architettura del progetto
 
 ```
-yocto/
- ├── poky/
- ├── meta-openembedded/
- ├── meta-raspberrypi/
- ├── meta-sa/
- ├── downloads/
- ├── sstate-cache/
- ├── build-qemu/
- ├── build-rpi4/
- └── yocto.sh
+cdy/
+ ├── yocto.sh                 # Script principale per build Yocto
+ ├── meta-sa/                 # Layer custom con ricette e immagini
+ ├── Open_Coupe_Lab_MD_EN+IT/ # Documenti ufficiali dell'associazione
+ ├── README.md                # Questo file
+ └── LICENSE.txt
 ```
 
 ---
 
-## 🧠 Notes
+## 🚀 Open Coupé Lab
 
-- Default image: `sa-image-minimal` (BusyBox + Dropbear + basic networking)  
-- The `meta-sa` layer is auto-generated if missing  
-- QEMU runs in `nographic` mode using `slirp` networking (serial console only)
+Open Coupé Lab è un’associazione in formazione nata per condividere **strumenti embedded open-source** per la Fiat Coupé.  
+L’obiettivo è sviluppare dispositivi **replicabili e documentati**, utilizzando un ecosistema completamente libero basato su Yocto Linux, Qt 6 e Raspberry Pi CM5.
+
+### 📄 Documentazione ufficiale
+
+I documenti costitutivi e di progetto si trovano nella cartella [`Open_Coupe_Lab_MD_EN+IT`](./Open_Coupe_Lab_MD_EN+IT):
+
+| Documento | Lingua | Descrizione |
+|------------|--------|-------------|
+| [Protocollo di intenti](./Open_Coupe_Lab_MD_EN+IT/IT/Protocollo_Intenti.md) | 🇮🇹 | Fondazione dell’associazione |
+| [Statuto](./Open_Coupe_Lab_MD_EN+IT/IT/Statuto.md) | 🇮🇹 | Regole interne |
+| [GoFundMe – Testo campagna](./Open_Coupe_Lab_MD_EN+IT/IT/GoFundMe_Text.md) | 🇮🇹 | Raccolta fondi ufficiale |
+| [Bylaws (EN)](./Open_Coupe_Lab_MD_EN+IT/EN/Bylaws.md) | 🇬🇧 | English version |
 
 ---
 
-## 🧰 Roadmap
+## 🔬 Progetti embedded correlati
 
-- Add `meta-qt6` integration for static Qt builds  
-- Enable EGLFS/framebuffer support  
-- Add Raspberry Pi 4 flash helper  
-- Provide prebuilt SDK releases  
+- **Dashboard Qt/QML** su Raspberry Pi CM5  
+- **Modulo acquisizione segnali e sensori veicolo**  
+- **Sistema fari intelligente e logica CAN-bus**  
+- **Logger telemetrico e strumentazione 3D**  
+
+Tutti i dispositivi sono **sperimentali e didattici**, non omologati per uso su strada.
 
 ---
 
-## 📄 License
+## 💡 Come contribuire
 
-MIT License — free to use and modify.
+- 🧰 **Contribuisci al codice Yocto / Qt** — tramite fork e pull request.  
+- 💬 **Partecipa come socio sviluppatore** — vedi [Statuto](./Open_Coupe_Lab_MD_EN+IT/IT/Statuto.md).  
+- ❤️ **Sostieni la campagna** — [GoFundMe: Sostieni Open Coupé Lab](./Open_Coupe_Lab_MD_EN+IT/IT/GoFundMe_Text.md).
+
+---
+
+## ⚠️ Avvertenza legale
+
+Tutti i dispositivi e software prodotti da Open Coupé Lab hanno **scopo esclusivamente sperimentale e didattico**.  
+Non sono omologati per uso su strada pubblica né certificati per installazione su veicoli in circolazione.
+
+---
+
+## 📄 Licenze
+
+- Software e ricette Yocto: **MIT License**  
+- Documentazione: **CC-BY-SA 4.0**  
+- © 2025 Open Coupé Lab — Capriate San Gervasio (BG)
