@@ -1,28 +1,68 @@
-# PROTOCOLLO DI INTENTI PER LA FONDAZIONE DELL’ASSOCIAZIONE “OPEN COUPÉ LAB”
+# 📜 Protocollo di Intenti — Open Youngtimer Lab
 
-## Premessa
-I sottoscritti promotori del progetto Open Coupé Lab, appassionati di elettronica, software e veicoli d’epoca, dichiarano la propria intenzione di costituire un’associazione senza scopo di lucro dedicata alla ricerca, sviluppo e condivisione open source di strumenti e tecnologie per la Fiat Coupé e altri veicoli storici.
+## Art. 1 — Premessa
+Il presente protocollo di intenti definisce gli obiettivi e gli impegni dei sottoscrittori per la costituzione dell’associazione **Open Youngtimer Lab**, con sede in **Capriate San Gervasio (BG)**.
 
-## Art. 1 — Oggetto
-Il presente protocollo definisce le condizioni e le modalità preliminari per la costituzione dell’associazione “Open Coupé Lab”, subordinandone l’avvio al buon esito di una raccolta fondi pubblica.
+L’associazione nasce con lo scopo di promuovere e sviluppare progetti open-source dedicati al restauro tecnico, alla diagnostica e alla modernizzazione elettronica di veicoli **youngtimer** (prodotti indicativamente tra il 1985 e il 2000).
 
-## Art. 2 — Campagna di raccolta fondi
-1. È istituita una campagna di crowdfunding pubblica denominata “Sostieni Open Coupé Lab”, ospitata sulla piattaforma GoFundMe.  
-2. La campagna avrà inizio il **10 novembre 2025** e terminerà il **15 gennaio 2026**.  
-3. L’obiettivo economico minimo per procedere alla costituzione è fissato in **1.500 euro netti**.  
-4. I fondi raccolti saranno destinati alla copertura delle spese di fondazione e all’acquisto dei materiali, strumenti e componenti indicati nel piano economico preliminare approvato dai promotori.
+---
 
-## Art. 3 — Condizione per la costituzione
-1. Qualora entro il 15 gennaio 2026 la raccolta fondi raggiunga o superi l’obiettivo stabilito, i firmatari si impegnano a costituire formalmente l’associazione entro il 31 gennaio 2026, depositando atto costitutivo e statuto presso l’Agenzia delle Entrate.  
-2. In caso contrario, il progetto verrà sospeso o riconvertito in iniziativa tecnica aperta, secondo le regole della piattaforma di crowdfunding utilizzata.
+## Art. 2 — Finalità
+Open Youngtimer Lab si propone di:
+- creare una rete di appassionati, tecnici e sviluppatori;
+- realizzare e documentare progetti open hardware e open software;
+- favorire la condivisione di conoscenze tecniche;
+- digitalizzare componenti non più reperibili tramite **scanner e stampa 3D**;
+- sviluppare strumenti di diagnostica, dashboard digitali e moduli embedded;
+- mantenere spirito educativo e comunitario, senza fini di lucro.
+
+---
+
+## Art. 3 — Elenco indicativo dei veicoli di interesse
+L’associazione è aperta a tutti i veicoli youngtimer, tra cui a titolo di esempio:
+
+| Marca | Modelli di interesse |
+|-------|----------------------|
+| **Fiat / Lancia / Alfa Romeo** | Coupé, Delta, 155, GTV, Spider, Barchetta, Punto GT |
+| **BMW** | E30, E36, **E46**, Z3 |
+| **Mazda** | MX-5 NA/NB |
+| **Peugeot** | 205 GTI, 306, 406 Coupé |
+| **Renault** | Clio 16V, Megane Coupé |
+| **Opel** | Calibra, Astra GSi |
+| **Volkswagen** | Corrado, Golf III/IV GTI |
+| **Honda / Toyota** | CRX, Civic V-VI, Celica, MR2 |
+| **Audi** | 80, A4 B5, TT MK1 |
+
+L’elenco è aperto a ulteriori proposte dei soci.
+
+---
 
 ## Art. 4 — Sottoscrittori
-Il presente protocollo è sottoscritto dai promotori della raccolta fondi, i quali, in caso di esito positivo della stessa, diventeranno automaticamente soci ordinari (categoria 3) dell’associazione “Open Coupé Lab”.  
-Essi conserveranno il diritto di richiedere successivamente il passaggio a una categoria diversa (sviluppatore, sostenitore globale o non globale) secondo le modalità previste dallo statuto.
+I sottoscrittori del presente protocollo si riconoscono come **futuri soci ordinari (categoria 3)** dell’associazione, al momento della sua fondazione.
 
-## Art. 5 — Data e luogo
-Capriate San Gervasio (BG), 7 novembre 2025
+---
 
-## Art. 6 — Allegati facoltativi
-- Piano economico preliminare (Open Coupé Lab 2025)  
-- Statuto provvisorio dell’associazione
+## Art. 5 — Costituzione e raccolta fondi
+La raccolta fondi si svolgerà dal **15 novembre 2025 al 1 marzo 2026**.  
+In caso di raggiungimento dell’obiettivo, verranno avviate le procedure di fondazione dell’associazione e l’acquisto delle attrezzature previste.
+
+---
+
+## Art. 6 — Finalità dei fondi
+I fondi raccolti saranno destinati a:
+- spese di fondazione e registrazione;
+- attrezzature di laboratorio (stampante 3D a resina, scanner 3D, strumenti da banco);
+- sviluppo tecnico e materiali per i primi progetti.
+
+---
+
+## Art. 7 — Natura associativa
+Open Youngtimer Lab è un’associazione senza scopo di lucro.  
+Tutti i contributi dei soci sono utilizzati per scopi educativi, tecnici e di ricerca collettiva.
+
+---
+
+## Art. 8 — Approvazione dei progetti
+I progetti saranno avviati **solo al raggiungimento di un numero minimo di soci interessati** e con la disponibilità di almeno un **socio sviluppatore** per la gestione tecnica.
+
+Ogni progetto approvato sarà allegato allo statuto come *Progetto riconosciuto*, con durata e responsabili indicati.
