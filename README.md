@@ -1,4 +1,4 @@
-# 🚗 Open Coupé Lab — Embedded Platform & Yocto Builder
+# 🚗 Open Youngtimer Lab — Embedded Platform & Yocto Builder
 
 [![License](https://img.shields.io/badge/License-MIT-blue)]()  
 [![Platform](https://img.shields.io/badge/Platform-Linux-lightgrey)]()  
@@ -12,9 +12,9 @@
 Questo repository unisce due componenti principali:
 
 1. **Yocto Builder** — ambiente interattivo minimale per generare immagini Linux embedded su Raspberry Pi 4 e Compute Module 5.  
-2. **Open Coupé Lab** — iniziativa no-profit dedicata allo sviluppo open-source di sistemi elettronici e software per la Fiat Coupé e altri veicoli d’epoca.
+2. **Open Youngtimer Lab** — iniziativa no-profit dedicata allo sviluppo open-source di sistemi elettronici e software per le youngitimer altri veicoli d’epoca.
 
-Il laboratorio Open Coupé Lab utilizzerà questa toolchain come base per costruire **dashboard digitali, moduli sensori e strumenti di telemetria** completamente open-source.
+Il laboratorio Open Youngtimer Lab utilizzerà questa toolchain come base per costruire **dashboard digitali, moduli sensori e strumenti di telemetria** completamente open-source.
 
 ---
 
@@ -42,7 +42,7 @@ Menu interattivo:
 | 2️⃣ | Compila l’immagine custom |
 | 3️⃣ | Avvia QEMU (emulazione ARM64) |
 | 4️⃣ | Crea SDK |
-| 5️⃣ | Installa SDK in `/opt/coupe-sdk` |
+| 5️⃣ | Installa SDK in `/opt/youngtimer-sdk` |
 
 ---
 
@@ -52,28 +52,28 @@ Menu interattivo:
 cdy/
  ├── yocto.sh                 # Script principale per build Yocto
  ├── meta-sa/                 # Layer custom con ricette e immagini
- ├── Open_Coupe_Lab_MD_EN+IT/ # Documenti ufficiali dell'associazione
+ ├── Open_Youngtimer_Lab_MD_EN+IT/ # Documenti ufficiali dell'associazione
  ├── README.md                # Questo file
  └── LICENSE.txt
 ```
 
 ---
 
-## 🚀 Open Coupé Lab
+## 🚀 Open Youngtimer Lab
 
-Open Coupé Lab è un’associazione in formazione nata per condividere **strumenti embedded open-source** per la Fiat Coupé.  
+Open Youngtimer Lab è un’associazione in formazione nata per condividere **strumenti embedded open-source** per le auto youngtimer.  
 L’obiettivo è sviluppare dispositivi **replicabili e documentati**, utilizzando un ecosistema completamente libero basato su Yocto Linux, Qt 6 e Raspberry Pi CM5.
 
 ### 📄 Documentazione ufficiale
 
-I documenti costitutivi e di progetto si trovano nella cartella [`Open_Coupe_Lab_MD_EN+IT`](./Open_Coupe_Lab_MD_EN+IT):
+I documenti costitutivi e di progetto si trovano nella cartella [`Open_Youngtimer_Lab_MD_EN+IT`](./Open_Youngtimer_Lab_MD_EN+IT):
 
 | Documento | Lingua | Descrizione |
 |------------|--------|-------------|
-| [Protocollo di intenti](./Open_Coupe_Lab_MD_EN+IT/IT/Protocollo_Intenti.md) | 🇮🇹 | Fondazione dell’associazione |
-| [Statuto](./Open_Coupe_Lab_MD_EN+IT/IT/Statuto.md) | 🇮🇹 | Regole interne |
-| [GoFundMe – Testo campagna](./Open_Coupe_Lab_MD_EN+IT/IT/GoFundMe_Text.md) | 🇮🇹 | Raccolta fondi ufficiale |
-| [Bylaws (EN)](./Open_Coupe_Lab_MD_EN+IT/EN/Bylaws.md) | 🇬🇧 | English version |
+| [Protocollo di intenti](./Open_Youngtimer_Lab_MD_EN+IT/IT/Protocollo_Intenti.md) | 🇮🇹 | Fondazione dell’associazione |
+| [Statuto](./Open_Youngtimer_Lab_MD_EN+IT/IT/Statuto.md) | 🇮🇹 | Regole interne |
+| [GoFundMe – Testo campagna](./Open_Youngtimer_Lab_MD_EN+IT/IT/GoFundMe_Text.md) | 🇮🇹 | Raccolta fondi ufficiale |
+| [Bylaws (EN)](./Open_Youngtimer_Lab_MD_EN+ITT/EN/Bylaws.md) | 🇬🇧 | English version |
 
 ---
 
@@ -91,14 +91,14 @@ Tutti i dispositivi sono **sperimentali e didattici**, non omologati per uso su 
 ## 💡 Come contribuire
 
 - 🧰 **Contribuisci al codice Yocto / Qt** — tramite fork e pull request.  
-- 💬 **Partecipa come socio sviluppatore** — vedi [Statuto](./Open_Coupe_Lab_MD_EN+IT/IT/Statuto.md).  
-- ❤️ **Sostieni la campagna** — [GoFundMe: Sostieni Open Coupé Lab](./Open_Coupe_Lab_MD_EN+IT/IT/GoFundMe_Text.md).
+- 💬 **Partecipa come socio sviluppatore** — vedi [Statuto](./Open_Youngtimer_Lab_MD_EN+IT/IT/Statuto.md).  
+- ❤️ **Sostieni la campagna** — [GoFundMe: Sostieni Open Youngtimer Lab](./Open_Youngtimer_Lab_MD_EN+IT/IT/GoFundMe_Text.md).
 
 ---
 
 ## ⚠️ Avvertenza legale
 
-Tutti i dispositivi e software prodotti da Open Coupé Lab hanno **scopo esclusivamente sperimentale e didattico**.  
+Tutti i dispositivi e software prodotti da Open Youngtimer Lab hanno **scopo esclusivamente sperimentale e didattico**.  
 Non sono omologati per uso su strada pubblica né certificati per installazione su veicoli in circolazione.
 
 ---
@@ -107,4 +107,4 @@ Non sono omologati per uso su strada pubblica né certificati per installazione 
 
 - Software e ricette Yocto: **MIT License**  
 - Documentazione: **CC-BY-SA 4.0**  
-- © 2025 Open Coupé Lab — Capriate San Gervasio (BG)
+- © 2025 Open Youngtimer Lab — Capriate San Gervasio (BG)
