@@ -1,74 +1,64 @@
-# BYLAWS OF THE “OPEN COUPÉ LAB” ASSOCIATION
+# 🏛️ Bylaws of the Association Open Youngtimer Lab
 
-**Official English Translation – Open Coupé Lab (November 2025)**
+## Art. 1 — Name and registered office
+An association named **Open Youngtimer Lab** is established, headquartered in **Capriate San Gervasio (BG), Italy**.  
+The association is non-profit and based on transparency, collaboration, and open technical knowledge.
 
-## Art. 1 — Name and Registered Office
-A non-profit association named “Open Coupé Lab” is hereby established, with its registered office in Capriate San Gervasio (BG).  
-The association may establish operational or branch offices in other locations in Italy or abroad.
+---
 
-## Art. 2 — Purposes and Objectives
-The association is non-partisan, non-denominational, and not for profit.  
-It promotes the research, development, and dissemination of open-source projects in electronics, software, and applied mechanics, with special attention to vintage and sports vehicles, especially the Fiat Coupé.
+## Art. 2 — Purpose
+The association’s purposes are to:
+- develop open-source projects for *youngtimer* vehicles (1985–2000);  
+- research and reproduce unavailable electronic components;  
+- build digital dashboards, embedded modules, and diagnostic tools;  
+- document and freely share results with the community.
 
-## Art. 3 — Activities
-To achieve its purposes, the association may:  
-- design and build open-source devices, components, and software;  
-- organize courses, workshops, and training activities;  
-- publish technical material and open-access documentation;  
-- promote collective research and experimental projects;  
-- raise funds and contributions to finance its activities.
+---
 
-## Art. 4 — Membership Categories
-1. **Founding Members** — participate in the act of incorporation, full rights, no annual fee.  
-2. **Developer Members** — actively collaborate on technical projects, contributing time and skills, with no annual fee.  
-3. **Ordinary Members** — join by paying the basic annual fee (€20), participate in the association’s life, and may later upgrade.  
-4. **Global Supporter Members** — pay a higher annual fee covering all projects and receive all devices produced.  
-5. **Non-Global Supporter Members** — contribute to specific projects, paying the related project fee.
+## Art. 3 — Membership categories
+| Category | Description | Fee | Voting rights |
+|-----------|--------------|------|---------------|
+| **1 – Founding Members** | Created the association and ensure its legal continuity | — | ✅ |
+| **2 – Developer Members** | Actively contribute to firmware, software, or hardware projects | — | ✅ |
+| **3 – Ordinary Members** | Provide financial support and may propose projects but **have no voting rights** | €40 / year | ❌ |
+| **4 – Global Supporters** | Financially support all active projects | higher fee | ❌ |
+| **5 – Single-Project Supporters** | Contribute to a specific project only | variable | ❌ |
 
-## Art. 5 — Admission and Fees
-Anyone sharing the association’s purposes may join.  
-All new members start as Ordinary Members and may upgrade to categories 4 or 5 by paying the corresponding fee.  
-Fees are annual, non-refundable, and not considered commercial payments.
+---
 
-## Art. 6 — Governing Bodies
-- General Assembly  
-- Board of Directors  
-- President
+## Art. 4 — Governing bodies
+- **Assembly of Founding and Developer Members** — decision-making body  
+- **Technical Council** — evaluates and approves projects  
+- **Treasurer** — handles funds and budgets  
+- **Project Leads** — appointed for each active project
 
-## Art. 7 — Economic Resources
-The association’s resources come from:  
-- membership fees (categories 3–4–5);  
-- voluntary contributions, donations, and sponsorships;  
-- fundraising and initiatives consistent with the association’s purposes.  
-Resources must be used exclusively for institutional activities and never for profit.
+---
 
-## Art. 8 — Non-Profit Nature
-The association is strictly non-profit and cannot distribute income or assets to its members.  
-Members may independently provide consultancy or installation services, provided they do not act on behalf of the association or use its name.
+## Art. 5 — Voting rules
+Only **Founding Members** and **Developer Members** have the right to vote, on an equal basis (one person = one vote).  
+Decisions are made by simple majority of those present.  
+Ordinary and Supporter Members may attend and collaborate but cannot vote.
 
-## Art. 9 — Experimental Use
-All devices and software are of an **experimental and educational** nature.  
-They are not approved for road use and must be used only for research or simulation in controlled environments.
+---
 
-## Art. 10 — Association Projects
-Each approved project becomes a **Project Attachment** specifying:  
-- title and objective,  
-- participating members,  
-- financial resources,  
-- duration (max 24 months).  
-Projects are temporary and can be renewed or archived by resolution.  
-Approved projects are attachments to these bylaws but do not modify them.
+## Art. 6 — Recognized projects
+Projects are opened only when a sufficient number of interested members and at least one Developer Member are available.  
+Each recognized project is attached to the bylaws with its duration, responsible person, and objectives.
 
-## Art. 11 — Membership Fees Allocation
-- Cat.3 → general management costs  
-- Cat.4 → common fund for all projects  
-- Cat.5 → specific project funding
+---
 
-## Art. 12 — Link to the Protocol of Intent
-The association is founded following the 2025 crowdfunding campaign “Support Open Coupé Lab”.
+## Art. 7 — Membership fees and funds
+- The annual ordinary fee is **€40**.  
+- All funds raised during the initial fundraising (2025–2026) will be used for **foundation and equipment**.  
+- Contributions from categories 4 and 5 are reserved for **production of devices and projects**.
 
-## Art. 13 — Dissolution
-In case of dissolution, any remaining assets shall be transferred to other associations with similar aims.
+---
 
-## Art. 14 — Final Provisions
-Matters not covered herein are subject to the Italian Civil Code and Legislative Decree 117/2017 (Third Sector Code).
+## Art. 8 — Duration and dissolution
+The association has an indefinite duration.  
+If dissolved, remaining assets shall be donated to another non-profit association with similar purposes.
+
+---
+
+## Art. 9 — Non-homologated devices
+All devices and software produced by the association are **for experimental and educational purposes only** and are **not approved for road use**.
