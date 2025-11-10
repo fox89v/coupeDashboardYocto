@@ -215,10 +215,10 @@ if [ "$main_choice" = "4" ]; then
 fi
 
 # ────────────────────────────────────────────────
-# 7️⃣ Install SDKs (default → /opt/coupe-sdk)
+# 7️⃣ Install SDKs (default → /opt/youngtimer-sdk)
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "5" ]; then
-  INSTALL_DIR="/opt/coupe-sdk"
+  INSTALL_DIR="/opt/youngtimer-sdk"
 
   echo ""
   echo "📦 SDK Installer → $INSTALL_DIR"
