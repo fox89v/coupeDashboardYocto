@@ -1,31 +1,67 @@
-# PROTOCOL OF INTENT FOR THE FOUNDATION OF THE “OPEN COUPÉ LAB” ASSOCIATION
+# 📜 Protocol of Intent — Open Youngtimer Lab
 
-**Official English Translation – Open Coupé Lab (November 2025)**
+## Art. 1 — Premise
+This Protocol of Intent defines the objectives and commitments of the undersigned for the foundation of the **Open Youngtimer Lab** association, based in **Capriate San Gervasio (BG), Italy**.
 
-## Premise
-The undersigned promoters of the Open Coupé Lab project, enthusiasts of electronics, software, and vintage cars, declare their intention to establish a non-profit association dedicated to open-source research, development, and sharing of tools and technologies for the Fiat Coupé and other historical vehicles.
+The association aims to promote and develop open-source projects focused on the technical restoration, diagnostics, and electronic modernization of **youngtimer vehicles** (produced approximately between 1985 and 2000).
 
-## Art. 1 — Purpose
-This protocol defines the preliminary conditions and procedures for establishing the “Open Coupé Lab” association, subject to the successful outcome of a public fundraising campaign.
+---
 
-## Art. 2 — Fundraising Campaign
-- **Platform:** GoFundMe  
-- **Period:** November 10, 2025 → January 15, 2026  
-- **Goal:** €1,500 net  
+## Art. 2 — Purpose
+Open Youngtimer Lab aims to:
+- connect enthusiasts, engineers, and developers;
+- design and document open-hardware and open-software projects;
+- share technical knowledge freely;
+- reproduce obsolete components using **3D scanning and printing**;
+- develop diagnostic tools, digital dashboards, and embedded modules;
+- operate in an educational, community-driven, non-profit way.
 
-Funds will be used to cover the legal establishment and the purchase of materials and components listed in the preliminary financial plan approved by the promoters.
+---
 
-## Art. 3 — Condition for Foundation
-If the target is reached by January 15, 2026, the signatories agree to formally establish the association by January 31, 2026.  
-Otherwise, the project will be suspended or converted into an open technical initiative, according to GoFundMe platform rules.
+## Art. 3 — Reference vehicles
+The association is open to all youngtimer vehicles, for example:
+
+| Manufacturer | Models of interest |
+|---------------|--------------------|
+| **Fiat / Lancia / Alfa Romeo** | Coupé, Delta, 155, GTV, Spider, Barchetta, Punto GT |
+| **BMW** | E30, E36, **E46**, Z3 |
+| **Mazda** | MX-5 NA/NB |
+| **Peugeot** | 205 GTI, 306, 406 Coupé |
+| **Renault** | Clio 16V, Megane Coupé |
+| **Opel** | Calibra, Astra GSi |
+| **Volkswagen** | Corrado, Golf III/IV GTI |
+| **Honda / Toyota** | CRX, Civic V–VI, Celica, MR2 |
+| **Audi** | 80, A4 B5, TT MK1 |
+
+This list is open to further suggestions by members.
+
+---
 
 ## Art. 4 — Signatories
-The promoters of the fundraising campaign automatically become **Ordinary Members (category 3)** of the association upon success of the campaign.  
-They may later upgrade to a different membership category (Developer, Global Supporter, Non-Global Supporter) according to the bylaws.
+The signatories of this document recognize themselves as **future Ordinary Members (category 3)** of the association upon its foundation.
 
-## Art. 5 — Date and Place
-Capriate San Gervasio (BG), November 7, 2025
+---
 
-## Art. 6 — Attachments
-- Preliminary Financial Plan (Open Coupé Lab 2025)  
-- Draft Bylaws of the Association
+## Art. 5 — Fundraising and foundation
+Fundraising will take place from **15 November 2025 to 1 March 2026**.  
+If the funding goal is reached, the association will be formally established and the planned equipment purchased.
+
+---
+
+## Art. 6 — Use of funds
+Funds will be used for:
+- legal registration and administrative expenses;  
+- laboratory equipment (3D resin printer, 3D scanner, bench tools);  
+- development materials for the first technical projects.
+
+---
+
+## Art. 7 — Non-profit nature
+Open Youngtimer Lab is a **non-profit association**.  
+All contributions are used solely for educational and collective technical purposes.
+
+---
+
+## Art. 8 — Project approval
+Projects are launched **only when a minimum number of interested members** and at least one **developer member** are available.  
+Each approved project is attached to the bylaws as a *Recognized Project* with its duration and responsible members specified.
