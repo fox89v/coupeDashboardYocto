@@ -7,7 +7,7 @@ cd "$(dirname "$0")"
 # ────────────────────────────────────────────────
 check_deps() {
   local MISSING=()
-  local DEPS=(git gawk wget diffstat unzip texinfo gcc g++ make cmake chrpath cpio python3 python3-pip python3-pexpect xz-utils debianutils iputils-ping libsdl1.2-dev xterm qemu-system-arm qemu-user-static cpulimit)
+  local DEPS=(git gawk wget diffstat unzip texinfo gcc g++ make cmake chrpath cpio python3 python3-pip python3-pexpect xz-utils debianutils iputils-ping libsdl1.2-dev xterm qemu-system-arm qemu-user-static cpulimit pv)
 
   echo "🔍 Checking host dependencies..."
   for pkg in "${DEPS[@]}"; do
@@ -270,7 +270,7 @@ fi
 # ────────────────────────────────────────────────
 # 8️⃣ Flash image to SD card (safe mode)
 # ────────────────────────────────────────────────
-if [ "$main_choice" = "8" ]; then
+if [ "$main_choice" = "6" ]; then
   echo "💾 Flash image to SD card"
   echo "──────────────────────────────"
   echo ""
@@ -291,7 +291,9 @@ if [ "$main_choice" = "8" ]; then
   echo "📦 Found image:"
   echo "   $IMG_FILE"
   echo ""
-  lsblk -o NAME,SIZE,MOUNTPOINT | grep -v "${BOOT_DEV##*/}" || true
+  lsblk -dpno NAME,SIZE,MODEL,TYPE |
+  grep -vE "loop|${BOOT_DEV##*/}|nvme" |
+  grep "disk"
   echo ""
   read -p "⚠️  Enter SD device (ex: /dev/sdb): " DEV
 

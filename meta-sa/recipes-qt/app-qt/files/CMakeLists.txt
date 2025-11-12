@@ -5,7 +5,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick)
+find_package(Qt6 REQUIRED COMPONENTS Gui Qml Quick)
 
 add_executable(app-qt
     main.cpp
@@ -13,5 +13,5 @@ add_executable(app-qt
 )
 
 target_link_libraries(app-qt
-    PRIVATE Qt6::Quick
+    PRIVATE Qt6::Gui Qt6::Qml Qt6::Quick
 )

@@ -1,9 +1,9 @@
 MACHINE ?= "qemuarm64"
 PACKAGE_CLASSES = "package_ipk"
 
-# 🧠 usa tutti i core disponibili per la build
-BB_NUMBER_THREADS ?= "${@oe.utils.cpu_count()}"
-PARALLEL_MAKE ?= "-j${@oe.utils.cpu_count()}"
+# lascia 2 core liberi
+BB_NUMBER_THREADS ?= "${@max(1, oe.utils.cpu_count() - 2)}"
+PARALLEL_MAKE ?= "-j${@max(1, oe.utils.cpu_count() - 2)}"
 
 # Mirror alternativi
 # ── Mirrors robusti (coppie: pattern -> mirror) ─────────────────
@@ -28,6 +28,8 @@ MIRRORS = "\
 
 # 🧩 libc leggera
 TCLIBC = "musl"
+ASSUME_PROVIDED += "nss-native"
+
 
 # 🧱 features minime ma con EGLFS
 DISTRO_FEATURES:append = " opengl egl kms"
@@ -70,16 +72,9 @@ DISTRO_FEATURES:remove = " x11 wayland"
 PACKAGECONFIG:append_pn-qtbase = " gles2 eglfs"
 PACKAGECONFIG:append_pn-qtdeclarative = " quick quickcontrols2 tools"
 
+
 # pacchetti principali Qt grafici
-IMAGE_INSTALL:append = " \
-    qtbase \
-    qtdeclarative \
-    qtmultimedia \
-    qtimageformats \
-    qtshadertools \
-    qttools \
-    qtquick3d \
-"
+IMAGE_INSTALL:append = " qtbase qtdeclarative qtmultimedia qtshadertools "
 
 
 # forza git:// -> https:// per i repo Qt

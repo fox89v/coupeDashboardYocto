@@ -13,11 +13,14 @@ S = "${WORKDIR}"
 
 inherit qt6-cmake
 
-# 🔧 dipendenze necessarie per Quick e QuickTools
-DEPENDS += "qtbase qtdeclarative qtshadertools qtmultimedia"
+DEPENDS += "qtbase qtdeclarative qtdeclarative-native"
 
-# 🔍 forza il path cmake nel sysroot corretto
-EXTRA_OECMAKE += "-DCMAKE_PREFIX_PATH=${STAGING_DIR_TARGET}/usr/lib/cmake"
+EXTRA_OECMAKE += "\
+ -DCMAKE_PREFIX_PATH=${STAGING_LIBDIR}/cmake:${STAGING_LIBDIR_NATIVE}/cmake \
+ -DQt6_DIR=${STAGING_LIBDIR}/cmake/Qt6 \
+ -DQt6Qml_DIR=${STAGING_LIBDIR}/cmake/Qt6Qml \
+ -DQt6QmlTools_DIR=${STAGING_LIBDIR_NATIVE}/cmake/Qt6QmlTools \
+"
 
 do_install() {
     install -d ${D}${bindir}
