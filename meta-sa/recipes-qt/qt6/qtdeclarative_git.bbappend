@@ -1,3 +1,1 @@
-PACKAGECONFIG:append = " quick tools"
-# PACKAGECONFIG:append:class-native = " tools"
-# PACKAGECONFIG:append:class-nativesdk = " tools"
+PACKAGECONFIG:append:class-target = " quick tools"
