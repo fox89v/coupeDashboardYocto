@@ -56,23 +56,21 @@ QB_DRIVE_TYPE = "virtio"
 QB_KERNEL_CMDLINE_APPEND = "console=ttyAMA0 console=tty0 root=/dev/vda rw mem=1024M net.ifnames=0 quiet loglevel=0 vt.global_cursor_default=0"
 
 # ────────────────────────────────────────────────
-# 🚀 Boot diretto in kmscube (senza systemd)
+# 🚀 Boot diretto in app-qt (senza systemd)
 # ────────────────────────────────────────────────
-ROOTFS_POSTPROCESS_COMMAND += "replace_init_with_kmscube; "
+ROOTFS_POSTPROCESS_COMMAND += "replace_init_with_app; "
 
-replace_init_with_kmscube() {
-    # rinomina systemd per sicurezza
+replace_init_with_app() {
     mv ${IMAGE_ROOTFS}/sbin/init ${IMAGE_ROOTFS}/sbin/init.orig || true
 
-    # crea init minimale che lancia kmscube
     cat << 'EOF' > ${IMAGE_ROOTFS}/sbin/init
 #!/bin/sh
 mount -t proc none /proc
 mount -t sysfs none /sys
 mount -t devtmpfs none /dev
-echo "🚀 Starting kmscube..."
-/usr/bin/kmscube
-echo "💀 kmscube exited, dropping to shell"
+echo "🚀 Starting app-qt (EGLFS)..."
+/usr/bin/app-qt
+echo "💀 app-qt exited, dropping to shell"
 /bin/sh
 EOF
     chmod +x ${IMAGE_ROOTFS}/sbin/init

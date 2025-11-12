@@ -30,8 +30,9 @@ MIRRORS = "\
 TCLIBC = "musl"
 
 # 🧱 features minime ma con EGLFS
-DISTRO_FEATURES = "opengl egl kms"
-DISTRO_FEATURES:remove = "x11 wayland nfs bluetooth wifi systemd-boot"
+DISTRO_FEATURES:append = " opengl egl kms"
+DISTRO_FEATURES:remove = " x11 wayland nfs bluetooth wifi systemd-boot"
+
 
 # 💨 niente splash, niente package-management
 IMAGE_FEATURES = ""
@@ -59,9 +60,31 @@ LICENSE_FLAGS_ACCEPTED += "synaptics-killswitch"
 PACKAGECONFIG:append_pn-qemu-native = " sdl"
 
 # ────────────────────────────────────────────────
-# 🧠 Qt base (solo core + EGLFS)
+# 🎨 Qt6 completo (EGLFS + QML + Controls + Multimedia)
 # ────────────────────────────────────────────────
+
+# usa EGLFS, niente X11 o Wayland
 DISTRO_FEATURES:append = " opengl egl"
 DISTRO_FEATURES:remove = " x11 wayland"
-PACKAGECONFIG:append_pn-qtbase = " gles2 eglfs"
 
+PACKAGECONFIG:append_pn-qtbase = " gles2 eglfs"
+PACKAGECONFIG:append_pn-qtdeclarative = " quick quickcontrols2 tools"
+
+# pacchetti principali Qt grafici
+IMAGE_INSTALL:append = " \
+    qtbase \
+    qtdeclarative \
+    qtmultimedia \
+    qtimageformats \
+    qtshadertools \
+    qttools \
+    qtquick3d \
+"
+
+
+# forza git:// -> https:// per i repo Qt
+BB_FETCH_PREMIRRORS:prepend = " \
+    git://code.qt.io/qt/ https://code.qt.io/qt/ \n \
+"
+
+IMAGE_INSTALL:append = " app-qt"

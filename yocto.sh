@@ -43,7 +43,8 @@ echo "2) Build custom image"
 echo "3) Run QEMU (only qemuarm64)"
 echo "4) Build SDK (toolchain)"
 echo "5) Install SDK (toolchain)"
-read -rp "Choice [1-5]: " main_choice
+echo "6) Flash image to sd card"
+read -rp "Choice [1-6]: " main_choice
 
 # 1️⃣ Configure project (clone layers)
 if [ "$main_choice" = "1" ]; then
@@ -100,16 +101,20 @@ if [ -n "$BUILDDIR" ]; then
 
   # 🔧 verifica e aggiungi i layer mancanti
   for layer in \
-    ../meta-openembedded/meta-oe \
-    ../meta-openembedded/meta-networking \
-    ../meta-openembedded/meta-python \
-    ../meta-raspberrypi \
-    ../meta-qt6 \
-    ../meta-sa; do
+  ../meta-openembedded/meta-oe \
+  ../meta-openembedded/meta-networking \
+  ../meta-openembedded/meta-python \
+  ../meta-raspberrypi \
+  ../meta-qt6 \
+  ../meta-sa; do
+  if [ -d "$layer" ]; then
     if ! bitbake-layers show-layers | grep -q "$(basename "$layer")"; then
       echo "➡️  Adding layer: $layer"
       bitbake-layers add-layer "$layer" || true
     fi
+  else
+    echo "⚠️  Layer not found: $layer"
+  fi
   done
 fi
 
@@ -206,22 +211,22 @@ fi
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "4" ]; then
   echo "🧰 Building SDK for $MACHINE..."
-  nice -n 10 bitbake -c populate_sdk sa-image-minimal
+  nice -n 10 bitbake meta-toolchain-qt6
   echo ""
-  echo "✅ SDK generated!"
-  echo "   You can find it in: $IMG_PATH/"
+  echo "✅ Qt6 SDK generated!"
+  echo "   You can find it in: $IMG_PATH/poky-glibc-x86_64-meta-toolchain-qt6-*"
   echo "   Install it with option [5]"
   exit 0
 fi
 
 # ────────────────────────────────────────────────
-# 7️⃣ Install SDKs (default → /opt/youngtimer-sdk)
+# 7️⃣ Install Qt6 SDK (default → /opt/youngtimer-sdk)
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "5" ]; then
   INSTALL_DIR="/opt/youngtimer-sdk"
 
   echo ""
-  echo "📦 SDK Installer → $INSTALL_DIR"
+  echo "📦 Qt6 SDK Installer → $INSTALL_DIR"
   echo "──────────────────────────────"
 
   if [ ! -d "$INSTALL_DIR" ]; then
@@ -238,18 +243,17 @@ if [ "$main_choice" = "5" ]; then
   fi
 
   SDKS=()
-  while IFS= read -r f; do SDKS+=("$f"); done < <(find build-qemu/tmp-musl/deploy/sdk -name "*.sh" 2>/dev/null || true)
-  while IFS= read -r f; do SDKS+=("$f"); done < <(find build-rpi4/tmp-musl/deploy/sdk -name "*.sh" 2>/dev/null || true)
+  while IFS= read -r f; do SDKS+=("$f"); done < <(find build-rpi4/tmp-musl/deploy/sdk -name "poky-glibc-x86_64-meta-toolchain-qt6-*.sh" 2>/dev/null || true)
 
   if [ ${#SDKS[@]} -eq 0 ]; then
-    echo "❌ No SDK installers found. Build them first with option [4]."
+    echo "❌ No Qt6 SDK installer found. Build it first with option [4]."
     exit 1
   fi
 
   echo "Found:"
   for s in "${SDKS[@]}"; do echo "  - $s"; done
   echo ""
-  echo "➡️  Installing all SDKs into $INSTALL_DIR..."
+  echo "➡️  Installing Qt6 SDK into $INSTALL_DIR..."
 
   for s in "${SDKS[@]}"; do
     echo "→ Installing $s"
@@ -257,8 +261,66 @@ if [ "$main_choice" = "5" ]; then
   done
 
   echo ""
-  echo "✅ SDKs installed in: $INSTALL_DIR"
-  echo "Activate (QEMU/RPi4):"
-  echo "  source $INSTALL_DIR/*/environment-setup-aarch64-oe-linux"
+  echo "✅ Qt6 SDK installed in: $INSTALL_DIR"
+  echo "Activate for RPi4:"
+  echo "  source $INSTALL_DIR/*/environment-setup-aarch64-poky-linux"
+  exit 0
+fi
+
+# ────────────────────────────────────────────────
+# 8️⃣ Flash image to SD card (safe mode)
+# ────────────────────────────────────────────────
+if [ "$main_choice" = "8" ]; then
+  echo "💾 Flash image to SD card"
+  echo "──────────────────────────────"
+  echo ""
+
+  IMG_DIR="build-rpi4/tmp-musl/deploy/images/raspberrypi4-64"
+  IMG_FILE=$(ls -t ${IMG_DIR}/*.wic.bz2 2>/dev/null | head -n 1)
+
+  if [ -z "$IMG_FILE" ]; then
+    echo "❌ No image found in ${IMG_DIR}"
+    exit 1
+  fi
+
+  # rileva il device di boot del sistema
+  BOOT_DEV=$(findmnt -no SOURCE / | sed 's/[0-9]*$//')
+  echo "🧠 Host boot device detected: $BOOT_DEV"
+  echo ""
+
+  echo "📦 Found image:"
+  echo "   $IMG_FILE"
+  echo ""
+  lsblk -o NAME,SIZE,MOUNTPOINT | grep -v "${BOOT_DEV##*/}" || true
+  echo ""
+  read -p "⚠️  Enter SD device (ex: /dev/sdb): " DEV
+
+  if [ "$DEV" = "$BOOT_DEV" ]; then
+    echo "🚫 Refusing to write to current boot device ($BOOT_DEV)!"
+    exit 1
+  fi
+
+  if [ ! -b "$DEV" ]; then
+    echo "❌ Device $DEV not found."
+    exit 1
+  fi
+
+  echo ""
+  read -p "⚡ Confirm flashing to $DEV ? (yes/no): " CONFIRM
+  if [ "$CONFIRM" != "yes" ]; then
+    echo "🚫 Aborted."
+    exit 0
+  fi
+
+  echo ""
+  echo "🧹 Unmounting old partitions..."
+  sudo umount ${DEV}?* 2>/dev/null || true
+
+  echo "🔥 Writing image (this may take a few minutes)..."
+  pv "$IMG_FILE" | bunzip2 | sudo dd of=$DEV bs=4M conv=fsync status=progress
+
+  echo ""
+  echo "✅ Done!"
+  echo "   You can now remove and boot the SD card."
   exit 0
 fi
