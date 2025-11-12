@@ -1,0 +1,16 @@
+# CMake build directory
+build/
+CMakeLists.txt.user
+
+# Qt Creator user data
+*.pro.user
+*.user.*
+*.qmlc
+*.jsc
+
+# Generated files
+*.o
+*.obj
+*.log
+*.cache/
+*.qmake.stash
