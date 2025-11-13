@@ -1,2 +1,0 @@
-BB_NUMBER_THREADS = "${@max(1, oe.utils.cpu_count() - 4)}"
-PARALLEL_MAKE = "-j${@max(1, oe.utils.cpu_count() - 4)}"
