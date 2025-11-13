@@ -1,0 +1,2 @@
+# Disabilita completamente QtPdf
+PACKAGECONFIG = ""
