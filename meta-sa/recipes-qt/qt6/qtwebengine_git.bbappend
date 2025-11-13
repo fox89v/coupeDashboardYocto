@@ -1,4 +1,16 @@
-PACKAGECONFIG = ""
+LICENSE = "CLOSED"
+LIC_FILES_CHKSUM = ""
+
+SRC_URI = ""
+S = "${WORKDIR}"
+
+do_fetch() {
+    :
+}
+
+do_unpack() {
+    :
+}
 
 do_configure() {
     :

@@ -2,12 +2,12 @@ MACHINE ?= "qemuarm64"
 PACKAGE_CLASSES = "package_ipk"
 
 
-BB_NUMBER_THREADS = "${@max(1, int(oe.utils.cpu_count() / 2))}"
-PARALLEL_MAKE = "-j${@max(1, int(oe.utils.cpu_count() / 2))}"
-BB_TASK_MEMORY = "1500"
-BB_PRESSURE_MAX_CPU = "60"
-BB_PRESSURE_MAX_IO = "50"
-BB_PRESSURE_MAX_MEM = "60"
+BB_NUMBER_THREADS = "${@max(1, oe.utils.cpu_count() - 1)}"
+PARALLEL_MAKE = "-j${@max(1, oe.utils.cpu_count() - 1)}"
+BB_TASK_MEMORY = "4000"
+BB_PRESSURE_MAX_CPU = "90"
+BB_PRESSURE_MAX_IO = "80"
+BB_PRESSURE_MAX_MEM = "90"
 
 # Mirror alternativi
 # ── Mirrors robusti (coppie: pattern -> mirror) ─────────────────
