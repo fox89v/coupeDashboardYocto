@@ -4,10 +4,10 @@ PACKAGE_CLASSES = "package_ipk"
 
 BB_NUMBER_THREADS = "${@max(1, oe.utils.cpu_count() - 1)}"
 PARALLEL_MAKE = "-j${@max(1, oe.utils.cpu_count() - 1)}"
-BB_TASK_MEMORY = "4000"
-BB_PRESSURE_MAX_CPU = "90"
-BB_PRESSURE_MAX_IO = "80"
-BB_PRESSURE_MAX_MEM = "90"
+BB_TASK_MEMORY = "5000"
+BB_PRESSURE_MAX_CPU = "95"
+BB_PRESSURE_MAX_IO = "90"
+BB_PRESSURE_MAX_MEM = "95"
 
 # Mirror alternativi
 # ── Mirrors robusti (coppie: pattern -> mirror) ─────────────────
