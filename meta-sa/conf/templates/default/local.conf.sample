@@ -1,10 +1,6 @@
 MACHINE ?= "qemuarm64"
 PACKAGE_CLASSES = "package_ipk"
 
-# lascia 2 core liberi
-BB_NUMBER_THREADS ?= "${@max(1, oe.utils.cpu_count() - 2)}"
-PARALLEL_MAKE ?= "-j${@max(1, oe.utils.cpu_count() - 2)}"
-
 # Mirror alternativi
 # ── Mirrors robusti (coppie: pattern -> mirror) ─────────────────
 INHERIT += "own-mirrors"
