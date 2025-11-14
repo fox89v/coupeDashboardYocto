@@ -235,29 +235,37 @@ fi
 # 7️⃣ Install SDK generated from sa-image-minimal
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "5" ]; then
-  INSTALL_DIR="/opt/youngtimer-sdk"
+  BASE_DIR="/opt/youngtimer-sdk"
 
   echo ""
-  echo "📦 SDK Installer → $INSTALL_DIR"
+  echo "📦 SDK Installer base → $BASE_DIR"
   echo "────────────────────────────────"
 
-  if [ ! -d "$INSTALL_DIR" ]; then
-    echo "ℹ️  Creating $INSTALL_DIR..."
-    if ! mkdir -p "$INSTALL_DIR" 2>/dev/null; then
-      echo "⚠️  Cannot create $INSTALL_DIR"
+  # ensure base dir exists and is writable
+  if [ ! -d "$BASE_DIR" ]; then
+    echo "ℹ️  Creating $BASE_DIR..."
+    if ! mkdir -p "$BASE_DIR" 2>/dev/null; then
+      echo "⚠️  Cannot create $BASE_DIR"
       echo "   Try running with sudo or choose another path."
       exit 1
     fi
-  elif [ ! -w "$INSTALL_DIR" ]; then
-    echo "⚠️  No write access to $INSTALL_DIR"
+  elif [ ! -w "$BASE_DIR" ]; then
+    echo "⚠️  No write access to $BASE_DIR"
     echo "   Try running with sudo or choose another path."
     exit 1
   fi
 
-  SDKS=()
+  # find any SDK for sa-image-minimal (poky/oecore/nodistro ecc.)
+    SDKS=()
+  # RPi4 SDKs
   while IFS= read -r f; do SDKS+=("$f"); done < <(
     find build-rpi4/tmp-musl/deploy/sdk \
-      -name "poky-*-sa-image-minimal-*-toolchain.sh" 2>/dev/null || true
+      -name "*sa-image-minimal*toolchain*.sh" 2>/dev/null || true
+  )
+  # QEMU SDKs
+  while IFS= read -r f; do SDKS+=("$f"); done < <(
+    find build-qemu/tmp-musl/deploy/sdk \
+      -name "*sa-image-minimal*toolchain*.sh" 2>/dev/null || true
   )
 
   if [ ${#SDKS[@]} -eq 0 ]; then
@@ -265,20 +273,41 @@ if [ "$main_choice" = "5" ]; then
     exit 1
   fi
 
-  echo "Found:"
-  for s in "${SDKS[@]}"; do echo "  - $s"; done
-  echo ""
-  echo "➡️  Installing SDK into $INSTALL_DIR..."
+  # if multiple SDKs exist, ask which one
+  if [ ${#SDKS[@]} -gt 1 ]; then
+    echo "⚠️ Multiple SDK installers found:"
+    i=1
+    for s in "${SDKS[@]}"; do
+      echo "  $i) $s"
+      ((i++))
+    done
+    echo ""
+    read -rp "Select one to install [1-${#SDKS[@]}]: " choice
+    SDK="${SDKS[$((choice-1))]}"
+  else
+    SDK="${SDKS[0]}"
+  fi
 
-  for s in "${SDKS[@]}"; do
-    echo "→ Installing $s"
-    sh "$s" -d "$INSTALL_DIR" -y
-  done
+  SDK_BASENAME=$(basename "$SDK" .sh)
+  SDK_INSTALL_DIR="${BASE_DIR}/${SDK_BASENAME}"
 
   echo ""
-  echo "✅ SDK installed in: $INSTALL_DIR"
-  echo "Activate for RPi4:"
-  echo "  source $INSTALL_DIR/*/environment-setup-aarch64-poky-linux"
+  echo "➡️  Installing SDK:"
+  echo "   $SDK"
+  echo "→ Target dir:"
+  echo "   $SDK_INSTALL_DIR"
+  echo ""
+
+  mkdir -p "$SDK_INSTALL_DIR"
+
+  sh "$SDK" -d "$SDK_INSTALL_DIR" -y
+
+  echo ""
+  echo "✅ SDK installed in:"
+  echo "   $SDK_INSTALL_DIR"
+  echo ""
+  echo "To activate for RPi4 (toolchain env), run something like:"
+  echo "  source ${SDK_INSTALL_DIR}/environment-setup-aarch64-poky-linux*"
   exit 0
 fi
 
