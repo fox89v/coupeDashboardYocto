@@ -3,9 +3,9 @@ LICENSE = "MIT"
 
 inherit core-image
 
-# ────────────────────────────────────────────────
-# 🧩 Base image — essenziale e veloce
-# ────────────────────────────────────────────────
+# -----------------------------------------------
+# Base image minimale
+# -----------------------------------------------
 IMAGE_FEATURES = ""
 IMAGE_FEATURES:remove = "splash package-management debug-tweaks"
 
@@ -21,11 +21,15 @@ IMAGE_INSTALL = " \
     kmscube \
 "
 
+# Rimuove moduli Qt 3D e OpenSSL (non necessari)
+IMAGE_INSTALL:remove = "qtquick3d qtquick3d-dev qtquick3d-native qtquick3d-qmlplugins"
+IMAGE_INSTALL:remove = "openssl"
+
 IMAGE_LINGUAS = "en-us"
 
-# ────────────────────────────────────────────────
-# 🧠 Qt + Font (aggiunti dopo il blocco principale)
-# ────────────────────────────────────────────────
+# -----------------------------------------------
+# Qt + Font (aggiunti separatamente)
+# -----------------------------------------------
 IMAGE_INSTALL:append = " \
     qtbase \
     qtdeclarative \
@@ -35,9 +39,9 @@ IMAGE_INSTALL:append = " \
     ttf-dejavu-serif \
 "
 
-# ────────────────────────────────────────────────
-# 🧾 Info EGL (opzionale)
-# ────────────────────────────────────────────────
+# -----------------------------------------------
+# Profilo shell per verificare lo stato EGL
+# -----------------------------------------------
 ROOTFS_POSTPROCESS_COMMAND += "egl_check_install; "
 
 egl_check_install() {
@@ -52,9 +56,9 @@ EOF
     chmod +x ${IMAGE_ROOTFS}/etc/profile.d/eglcheck.sh
 }
 
-# ────────────────────────────────────────────────
-# ⚙️ QEMU tuning (emulazione Pi4)
-# ────────────────────────────────────────────────
+# -----------------------------------------------
+# Configurazione QEMU (emulazione Raspberry Pi 4)
+# -----------------------------------------------
 QB_SYSTEM_NAME          = "qemu-system-aarch64"
 QB_MACHINE              = "virt"
 QB_CPU                  = "cortex-a72"
@@ -66,9 +70,9 @@ QB_NET_OPT              = "-netdev user,id=net0,hostfwd=tcp::2222-:22 -device vi
 QB_DRIVE_TYPE           = "virtio"
 QB_KERNEL_CMDLINE_APPEND = "console=ttyAMA0 console=tty0 root=/dev/vda rw mem=1024M net.ifnames=0 quiet loglevel=0 vt.global_cursor_default=0"
 
-# ────────────────────────────────────────────────
-# 🚀 Boot diretto in app-qt (senza systemd)
-# ────────────────────────────────────────────────
+# -----------------------------------------------
+# Avvio diretto dell'app Qt (senza systemd)
+# -----------------------------------------------
 ROOTFS_POSTPROCESS_COMMAND += "replace_init_with_app; "
 
 replace_init_with_app() {
@@ -79,9 +83,9 @@ replace_init_with_app() {
 mount -t proc none /proc
 mount -t sysfs none /sys
 mount -t devtmpfs none /dev
-echo "🚀 Starting app-qt (EGLFS)..."
+echo "Starting app-qt (EGLFS)..."
 /usr/bin/app-qt
-echo "💀 app-qt exited, dropping to shell"
+echo "app-qt exited, dropping to shell"
 /bin/sh
 EOF
     chmod +x ${IMAGE_ROOTFS}/sbin/init

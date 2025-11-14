@@ -3,11 +3,15 @@ set -e
 cd "$(dirname "$0")"
 
 # ────────────────────────────────────────────────
-# 🧰 Check host dependencies
+# 0️⃣ Check host dependencies
 # ────────────────────────────────────────────────
 check_deps() {
   local MISSING=()
-  local DEPS=(git gawk wget diffstat unzip texinfo gcc g++ make cmake chrpath cpio python3 python3-pip python3-pexpect xz-utils debianutils iputils-ping libsdl1.2-dev xterm qemu-system-arm qemu-user-static cpulimit pv)
+  local DEPS=(
+    git gawk wget diffstat unzip texinfo gcc g++ make cmake chrpath cpio
+    python3 python3-pip python3-pexpect xz-utils debianutils iputils-ping
+    libsdl1.2-dev xterm qemu-system-arm qemu-user-static cpulimit pv
+  )
 
   echo "🔍 Checking host dependencies..."
   for pkg in "${DEPS[@]}"; do
@@ -38,15 +42,17 @@ check_deps
 echo ""
 echo "🚀 Yocto Project Manager"
 echo "────────────────────────────────────────────"
-echo "1) Configure project"
-echo "2) Build custom image"
-echo "3) Run QEMU (only qemuarm64)"
-echo "4) Build SDK (toolchain)"
-echo "5) Install SDK (toolchain)"
-echo "6) Flash image to sd card"
+echo "1) Configure project (clone layers)"
+echo "2) Build custom image (sa-image-minimal)"
+echo "3) Run QEMU (qemuarm64)"
+echo "4) Build SDK from sa-image-minimal"
+echo "5) Install SDK"
+echo "6) Flash image to SD card"
 read -rp "Choice [1-6]: " main_choice
 
+# ────────────────────────────────────────────────
 # 1️⃣ Configure project (clone layers)
+# ────────────────────────────────────────────────
 if [ "$main_choice" = "1" ]; then
   echo "🧩 Setting up repositories..."
 
@@ -57,14 +63,25 @@ if [ "$main_choice" = "1" ]; then
 
   mkdir -p downloads sstate-cache
 
-  echo -e "\n✅ Setup complete!\n   Layers cloned:\n   - poky\n   - meta-openembedded\n   - meta-raspberrypi\n   - meta-qt6\n\nNext: run option [2] to build your image."
+  echo ""
+  echo "✅ Setup complete!"
+  echo "   Layers cloned:"
+  echo "   - poky"
+  echo "   - meta-openembedded"
+  echo "   - meta-raspberrypi"
+  echo "   - meta-qt6"
+  echo ""
+  echo "Next: run option [2] to build your image."
   exit 0
 fi
 
 # ────────────────────────────────────────────────
-# 2️⃣ Select target (for build & SDK)
+# 2️⃣ Target selection (for build & SDK)
 # ────────────────────────────────────────────────
-if [ "$main_choice" = "2" ] || [ "$main_choice" = "4" ]; then
+BUILDDIR=""
+IMG_PATH=""
+
+if [[ "$main_choice" = "2" || "$main_choice" = "4" ]]; then
   echo ""
   echo "Select target:"
   echo "  1) QEMU ARM64"
@@ -75,71 +92,70 @@ if [ "$main_choice" = "2" ] || [ "$main_choice" = "4" ]; then
     1)
       export MACHINE="qemuarm64"
       BUILDDIR="build-qemu"
-      IMG_PATH="tmp/deploy/images/qemuarm64"
+      IMG_PATH="tmp-musl/deploy/images/qemuarm64"
       ;;
     2)
       export MACHINE="raspberrypi4-64"
       BUILDDIR="build-rpi4"
-      IMG_PATH="tmp/deploy/images/raspberrypi4-64"
+      IMG_PATH="tmp-musl/deploy/images/raspberrypi4-64"
       ;;
     *)
       echo "❌ Invalid choice"
       exit 1
       ;;
   esac
+
+  if [ -z "$BUILDDIR" ]; then
+    echo "❌ Internal error: BUILDDIR not set"
+    exit 1
+  fi
 fi
 
 # ────────────────────────────────────────────────
-# 3️⃣ Init build env (via TEMPLATECONF=default)
+# 3️⃣ Init build env (oe-init-build-env)
 # ────────────────────────────────────────────────
 if [ -n "$BUILDDIR" ]; then
   echo "🧩 Preparing build environment for $MACHINE..."
   export TEMPLATECONF="../meta-sa/conf/templates/default"
 
-  # 👉 il MACHINE viene esportato PRIMA di chiamare oe-init-build-env
   MACHINE="$MACHINE" TEMPLATECONF="$TEMPLATECONF" source poky/oe-init-build-env "$BUILDDIR"
 
-  # 🔧 verifica e aggiungi i layer mancanti
+  # dopo oe-init-build-env siamo dentro $BUILDDIR
+  # aggiungi layer se mancano
   for layer in \
-  ../meta-openembedded/meta-oe \
-  ../meta-openembedded/meta-networking \
-  ../meta-openembedded/meta-python \
-  ../meta-raspberrypi \
-  ../meta-qt6 \
-  ../meta-sa; do
-  if [ -d "$layer" ]; then
-    if ! bitbake-layers show-layers | grep -q "$(basename "$layer")"; then
-      echo "➡️  Adding layer: $layer"
-      bitbake-layers add-layer "$layer" || true
+    ../meta-openembedded/meta-oe \
+    ../meta-openembedded/meta-networking \
+    ../meta-openembedded/meta-python \
+    ../meta-raspberrypi \
+    ../meta-qt6 \
+    ../meta-sa
+  do
+    if [ -d "$layer" ]; then
+      if ! bitbake-layers show-layers | grep -q "$(basename "$layer")"; then
+        echo "➡️  Adding layer: $layer"
+        bitbake-layers add-layer "$layer" || true
+      fi
+    else
+      echo "⚠️  Layer not found: $layer"
     fi
-  else
-    echo "⚠️  Layer not found: $layer"
-  fi
   done
 fi
 
-
 # ────────────────────────────────────────────────
-# 4️⃣ Build image
+# 4️⃣ Build image (sa-image-minimal)
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "2" ]; then
-  read -rp "Limit CPU usage with cpulimit? [y/N]: " limit_cpu
-  USE_CPULIMIT=false
-  if [[ "$limit_cpu" =~ ^[Yy]$ ]]; then
-    read -rp "Enter CPU percentage (e.g. 60): " CPU_PERCENT
-    USE_CPULIMIT=true
-  fi
-
   echo "🛠️  Building image for $MACHINE..."
   TARGET="sa-image-minimal"
-  if [ "$USE_CPULIMIT" = true ]; then
-    nice -n 10 cpulimit -l "$CPU_PERCENT" -- bitbake "$TARGET"
-  else
-    nice -n 10 bitbake "$TARGET"
-  fi
-  echo "✅ Image built in $IMG_PATH/"
+
+  nice -n 10 bitbake "$TARGET"
+
+  echo ""
+  echo "✅ Image built."
+  echo "   Path: $PWD/tmp-musl/deploy/images/$MACHINE/"
   exit 0
 fi
+
 
 # ────────────────────────────────────────────────
 # 5️⃣ Run QEMU (direct, no runqemu)
@@ -147,7 +163,6 @@ fi
 if [ "$main_choice" = "3" ]; then
   echo "🖥️  Run QEMU (direct mode, SDL)…"
 
-  # prendi l'ultimo .qemuboot.conf generato
   CONF=$(ls -1 build-qemu/tmp-musl/deploy/images/qemuarm64/*.qemuboot.conf 2>/dev/null | tail -n 1 || true)
   if [ -z "$CONF" ] || [ ! -f "$CONF" ]; then
     echo "❌ No .qemuboot.conf found. Build QEMU image first (menu → 2 → QEMU)."
@@ -157,7 +172,6 @@ if [ "$main_choice" = "3" ]; then
   echo "📄 Using: $CONF"
   IMG_DIR="$(dirname "$CONF")"
 
-  # helper per leggere "chiave = valore"
   getv() { grep -E "^$1[[:space:]]*=" "$CONF" | sed 's/^[^=]*=\s*//'; }
 
   KERNEL_IMG="$(getv kernel_imagetype)"
@@ -166,10 +180,8 @@ if [ "$main_choice" = "3" ]; then
   CPU_OPT="$(getv qb_cpu)"
   MACH_OPT="$(getv QB_MACHINE)"
   GPU_OPT="$(getv qb_graphics)"
-  # se vuoi forzare SDL: metti qui la tua policy display
   DISPLAY_OPT="-display sdl,gl=off,show-cursor=on"
 
-  # fallback sensati
   [ -z "$KERNEL_IMG" ] && KERNEL_IMG="Image"
   [ -z "$MEM" ] && MEM="1024"
   [ -z "$CPU_OPT" ] && CPU_OPT="cortex-a72"
@@ -205,29 +217,29 @@ if [ "$main_choice" = "3" ]; then
     -netdev user,id=net0,hostfwd=tcp::2222-:22 -device virtio-net-pci,netdev=net0
 fi
 
-
 # ────────────────────────────────────────────────
-# 6️⃣ Build SDK (for selected target)
+# 6️⃣ Build SDK (populate_sdk da sa-image-minimal)
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "4" ]; then
-  echo "🧰 Building SDK for $MACHINE..."
-  nice -n 10 bitbake meta-toolchain-qt6
+  echo "🧰 Building SDK for $MACHINE from sa-image-minimal..."
+  nice -n 10 bitbake sa-image-minimal -c populate_sdk
+
   echo ""
-  echo "✅ Qt6 SDK generated!"
-  echo "   You can find it in: $IMG_PATH/poky-glibc-x86_64-meta-toolchain-qt6-*"
+  echo "✅ SDK generated from sa-image-minimal!"
+  echo "   You can find it in: $PWD/tmp-musl/deploy/sdk/"
   echo "   Install it with option [5]"
   exit 0
 fi
 
 # ────────────────────────────────────────────────
-# 7️⃣ Install Qt6 SDK (default → /opt/youngtimer-sdk)
+# 7️⃣ Install SDK generated from sa-image-minimal
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "5" ]; then
   INSTALL_DIR="/opt/youngtimer-sdk"
 
   echo ""
-  echo "📦 Qt6 SDK Installer → $INSTALL_DIR"
-  echo "──────────────────────────────"
+  echo "📦 SDK Installer → $INSTALL_DIR"
+  echo "────────────────────────────────"
 
   if [ ! -d "$INSTALL_DIR" ]; then
     echo "ℹ️  Creating $INSTALL_DIR..."
@@ -243,17 +255,20 @@ if [ "$main_choice" = "5" ]; then
   fi
 
   SDKS=()
-  while IFS= read -r f; do SDKS+=("$f"); done < <(find build-rpi4/tmp-musl/deploy/sdk -name "poky-glibc-x86_64-meta-toolchain-qt6-*.sh" 2>/dev/null || true)
+  while IFS= read -r f; do SDKS+=("$f"); done < <(
+    find build-rpi4/tmp-musl/deploy/sdk \
+      -name "poky-*-sa-image-minimal-*-toolchain.sh" 2>/dev/null || true
+  )
 
   if [ ${#SDKS[@]} -eq 0 ]; then
-    echo "❌ No Qt6 SDK installer found. Build it first with option [4]."
+    echo "❌ No SDK installer found. Build it first with option [4] on Raspberry Pi 4 target."
     exit 1
   fi
 
   echo "Found:"
   for s in "${SDKS[@]}"; do echo "  - $s"; done
   echo ""
-  echo "➡️  Installing Qt6 SDK into $INSTALL_DIR..."
+  echo "➡️  Installing SDK into $INSTALL_DIR..."
 
   for s in "${SDKS[@]}"; do
     echo "→ Installing $s"
@@ -261,7 +276,7 @@ if [ "$main_choice" = "5" ]; then
   done
 
   echo ""
-  echo "✅ Qt6 SDK installed in: $INSTALL_DIR"
+  echo "✅ SDK installed in: $INSTALL_DIR"
   echo "Activate for RPi4:"
   echo "  source $INSTALL_DIR/*/environment-setup-aarch64-poky-linux"
   exit 0
@@ -272,7 +287,7 @@ fi
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "6" ]; then
   echo "💾 Flash image to SD card"
-  echo "──────────────────────────────"
+  echo "────────────────────────────────"
   echo ""
 
   IMG_DIR="build-rpi4/tmp-musl/deploy/images/raspberrypi4-64"
@@ -283,17 +298,15 @@ if [ "$main_choice" = "6" ]; then
     exit 1
   fi
 
-  # rileva il device di boot del sistema
   BOOT_DEV=$(findmnt -no SOURCE / | sed 's/[0-9]*$//')
   echo "🧠 Host boot device detected: $BOOT_DEV"
   echo ""
-
   echo "📦 Found image:"
   echo "   $IMG_FILE"
   echo ""
   lsblk -dpno NAME,SIZE,MODEL,TYPE |
-  grep -vE "loop|${BOOT_DEV##*/}|nvme" |
-  grep "disk"
+    grep -vE "loop|${BOOT_DEV##*/}|nvme" |
+    grep "disk" || true
   echo ""
   read -p "⚠️  Enter SD device (ex: /dev/sdb): " DEV
 
@@ -319,7 +332,7 @@ if [ "$main_choice" = "6" ]; then
   sudo umount ${DEV}?* 2>/dev/null || true
 
   echo "🔥 Writing image (this may take a few minutes)..."
-  pv "$IMG_FILE" | bunzip2 | sudo dd of=$DEV bs=4M conv=fsync status=progress
+  pv "$IMG_FILE" | bunzip2 | sudo dd of="$DEV" bs=4M conv=fsync status=progress
 
   echo ""
   echo "✅ Done!"

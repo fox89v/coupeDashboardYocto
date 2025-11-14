@@ -4,10 +4,10 @@ PACKAGE_CLASSES = "package_ipk"
 
 BB_NUMBER_THREADS = "${@max(1, oe.utils.cpu_count() - 1)}"
 PARALLEL_MAKE = "-j${@max(1, oe.utils.cpu_count() - 1)}"
-BB_TASK_MEMORY = "5000"
-BB_PRESSURE_MAX_CPU = "95"
-BB_PRESSURE_MAX_IO = "90"
-BB_PRESSURE_MAX_MEM = "95"
+BB_TASK_MEMORY = "12000"
+BB_PRESSURE_MAX_CPU = "800"
+BB_PRESSURE_MAX_IO = "800"
+BB_PRESSURE_MAX_MEM = "800"
 
 # Mirror alternativi
 # ── Mirrors robusti (coppie: pattern -> mirror) ─────────────────
@@ -56,9 +56,6 @@ VOLATILE_LOG_DIR = "yes"
 SSTATE_DIR ?= "${TOPDIR}/../sstate-cache"
 DL_DIR ?= "${TOPDIR}/../downloads"
 
-# 🔧 pulizia post-build
-INHERIT += "rm_work"
-
 # ⚠️ accetta licenze proprietarie (firmware RPi)
 LICENSE_FLAGS_ACCEPTED += "synaptics-killswitch"
 
@@ -76,14 +73,21 @@ DISTRO_FEATURES:remove = " x11 wayland"
 PACKAGECONFIG:append_pn-qtbase = " gles2 eglfs"
 PACKAGECONFIG:append_pn-qtdeclarative = " quick quickcontrols2 tools"
 
-
 # pacchetti principali Qt grafici
-IMAGE_INSTALL:append = " qtbase qtdeclarative qtmultimedia qtshadertools "
-
+IMAGE_INSTALL:append = " qtbase qtdeclarative qtmultimedia qtshadertools app-qt"
 
 # forza git:// -> https:// per i repo Qt
 BB_FETCH_PREMIRRORS:prepend = " \
     git://code.qt.io/qt/ https://code.qt.io/qt/ \n \
 "
 
-IMAGE_INSTALL:append = " app-qt"
+# ────────────────────────────────────────────────
+# 🚫 BLACKLIST dì Quick3D
+# ────────────────────────────────────────────────
+
+PACKAGE_EXCLUDE += "qtquick3dphysics"
+PACKAGE_EXCLUDE += "qtquick3dparticleeffects"
+PACKAGE_EXCLUDE += "qtquick3dspatialaudio"
+PACKAGE_EXCLUDE += "qtquick3d-assimp"
+PACKAGE_EXCLUDE += "qtquick3d-tools"
+
