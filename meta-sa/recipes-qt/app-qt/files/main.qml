@@ -9,6 +9,6 @@ ApplicationWindow {
 
     Label {
         anchors.centerIn: parent
-        text: "Hello coupe 😎"
+        text: "Hello youngtimer 😎"
     }
 }
