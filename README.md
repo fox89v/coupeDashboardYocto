@@ -95,7 +95,10 @@ Tutti i dispositivi sono **sperimentali e didattici**, non omologati per uso su 
 
 - 🧰 **Contribuisci al codice Yocto / Qt** — tramite fork e pull request.  
 - 💬 **Partecipa come socio sviluppatore** — vedi [Statuto](./Open_Youngtimer_Lab_MD_EN+IT/IT/Statuto.md).  
-- ❤️ **Sostieni la campagna** — [GoFundMe: Sostieni Open Youngtimer Lab](./Open_Youngtimer_Lab_MD_EN+IT/IT/GoFundMe_Text.md).
+- ❤️ **Sostieni la campagna** —
+  [GoFundMe: Sostieni Open Youngtimer Lab](./Open_Youngtimer_Lab_MD_EN+IT/IT/GoFundMe_Text.md)  
+  [Link diretto alla raccolta](https://gofund.me/b0e7df704)
+
 
 ---
 
