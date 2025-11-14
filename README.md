@@ -16,6 +16,9 @@ Questo repository unisce due componenti principali:
 
 Il laboratorio Open Youngtimer Lab utilizzerà questa toolchain come base per costruire **dashboard digitali, moduli sensori e strumenti di telemetria** completamente open-source.
 
+[Seguimi su WhatsApp](https://whatsapp.com/channel/0029Vb7HTF8It5s4jT0nj20P)
+
+
 ---
 
 ## ⚙️ Yocto Builder
