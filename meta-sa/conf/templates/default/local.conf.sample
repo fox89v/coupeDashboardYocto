@@ -28,7 +28,8 @@ MIRRORS = "\
     http://www.thrysoee.dk/editline/ http://mirror.yoctoproject.org/sources/ \n \
 "
 
-
+INHERIT += "rm_work"
+RM_OLD_WORK = "1"
 
 # 🧩 libc leggera
 TCLIBC = "musl"
