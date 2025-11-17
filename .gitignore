@@ -21,6 +21,7 @@ build*/tmp-musl/
 build-qemu/
 build-rpi4/
 build-qtcreator/
+build-tools/
 
 # Shared caches
 downloads/

@@ -40,8 +40,4 @@ QB_NET_OPT      = "-netdev user,id=net0,hostfwd=tcp::2222-:22 -device virtio-net
 QB_DRIVE_TYPE   = "virtio"
 QB_KERNEL_CMDLINE_APPEND = "console=ttyAMA0 console=tty0 root=/dev/vda rw mem=1024M net.ifnames=0 quiet loglevel=0 vt.global_cursor_default=0"
 
-# --- Qt tools per SDK (host: moc, rcc, qmlcachegen, ecc.) ---
-TOOLCHAIN_HOST_TASK:append = " \
-    nativesdk-packagegroup-qt6-toolchain-host \
-"
 

@@ -21,40 +21,41 @@ check_deps() {
   done
 
   if [ ${#MISSING[@]} -ne 0 ]; then
-    echo "❌ Missing packages detected:"
+    echo "❌ Missing packages:"
     printf '   %s\n' "${MISSING[@]}"
     echo ""
-    echo "💡 Install them with:"
-    echo "   sudo apt update && sudo apt install -y ${MISSING[*]}"
-    echo ""
+    echo "Install with:"
+    echo "   sudo apt install -y ${MISSING[*]}"
     read -rp "Continue anyway? [y/N]: " ans
     [[ "$ans" =~ ^[Yy]$ ]] || exit 1
   else
-    echo "✅ All required packages are installed."
+    echo "✅ All required packages installed."
   fi
 }
 
 check_deps
 
 # ────────────────────────────────────────────────
-# 🚀 Main menu
+# 🚀 Menu
 # ────────────────────────────────────────────────
 echo ""
 echo "🚀 Yocto Project Manager"
 echo "────────────────────────────────────────────"
 echo "1) Configure project (clone layers)"
-echo "2) Build custom image (sa-image-minimal)"
-echo "3) Run QEMU (qemuarm64)"
-echo "4) Build SDK from sa-image-minimal"
-echo "5) Install SDK"
-echo "6) Flash image to SD card"
-read -rp "Choice [1-6]: " main_choice
+echo "2) Build custom IMAGE (sa-image-minimal)"
+echo "3) Run QEMU"
+echo "4) Build HOST SDK (buildtools-extended)"
+echo "5) Install HOST SDK"
+echo "6) Build TARGET SDK (meta-toolchain)"
+echo "7) Install TARGET SDK"
+echo "8) Flash SD card"
+read -rp "Choice [1-8]: " main_choice
 
 # ────────────────────────────────────────────────
-# 1️⃣ Configure project (clone layers)
+# 1️⃣ Clone layers
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "1" ]; then
-  echo "🧩 Setting up repositories..."
+  echo "🧩 Cloning Yocto layers..."
 
   [ -d poky ] || git clone -b scarthgap https://git.yoctoproject.org/poky poky
   [ -d meta-openembedded ] || git clone -b scarthgap https://git.openembedded.org/meta-openembedded meta-openembedded
@@ -64,24 +65,14 @@ if [ "$main_choice" = "1" ]; then
   mkdir -p downloads sstate-cache
 
   echo ""
-  echo "✅ Setup complete!"
-  echo "   Layers cloned:"
-  echo "   - poky"
-  echo "   - meta-openembedded"
-  echo "   - meta-raspberrypi"
-  echo "   - meta-qt6"
-  echo ""
-  echo "Next: run option [2] to build your image."
+  echo "✅ Layers cloned successfully!"
   exit 0
 fi
 
 # ────────────────────────────────────────────────
-# 2️⃣ Target selection (for build & SDK)
+# Helper: choose target machine
 # ────────────────────────────────────────────────
-BUILDDIR=""
-IMG_PATH=""
-
-if [[ "$main_choice" = "2" || "$main_choice" = "4" ]]; then
+choose_target() {
   echo ""
   echo "Select target:"
   echo "  1) QEMU ARM64"
@@ -90,38 +81,30 @@ if [[ "$main_choice" = "2" || "$main_choice" = "4" ]]; then
 
   case "$choice" in
     1)
-      export MACHINE="qemuarm64"
+      MACHINE="qemuarm64"
       BUILDDIR="build-qemu"
-      IMG_PATH="tmp-musl/deploy/images/qemuarm64"
       ;;
     2)
-      export MACHINE="raspberrypi4-64"
+      MACHINE="raspberrypi4-64"
       BUILDDIR="build-rpi4"
-      IMG_PATH="tmp-musl/deploy/images/raspberrypi4-64"
       ;;
     *)
       echo "❌ Invalid choice"
       exit 1
       ;;
   esac
-
-  if [ -z "$BUILDDIR" ]; then
-    echo "❌ Internal error: BUILDDIR not set"
-    exit 1
-  fi
-fi
+}
 
 # ────────────────────────────────────────────────
-# 3️⃣ Init build env (oe-init-build-env)
+# 2️⃣ Build IMAGE
 # ────────────────────────────────────────────────
-if [ -n "$BUILDDIR" ]; then
-  echo "🧩 Preparing build environment for $MACHINE..."
+if [ "$main_choice" = "2" ]; then
+  choose_target
+
+  echo "🛠️  Building image for $MACHINE..."
   export TEMPLATECONF="../meta-sa/conf/templates/default"
-
   MACHINE="$MACHINE" TEMPLATECONF="$TEMPLATECONF" source poky/oe-init-build-env "$BUILDDIR"
 
-  # dopo oe-init-build-env siamo dentro $BUILDDIR
-  # aggiungi layer se mancano
   for layer in \
     ../meta-openembedded/meta-oe \
     ../meta-openembedded/meta-networking \
@@ -130,241 +113,146 @@ if [ -n "$BUILDDIR" ]; then
     ../meta-qt6 \
     ../meta-sa
   do
-    if [ -d "$layer" ]; then
-      if ! bitbake-layers show-layers | grep -q "$(basename "$layer")"; then
-        echo "➡️  Adding layer: $layer"
-        bitbake-layers add-layer "$layer" || true
-      fi
-    else
-      echo "⚠️  Layer not found: $layer"
-    fi
+    bitbake-layers show-layers | grep -q "$(basename "$layer")" || \
+      bitbake-layers add-layer "$layer"
   done
-fi
 
-# ────────────────────────────────────────────────
-# 4️⃣ Build image (sa-image-minimal)
-# ────────────────────────────────────────────────
-if [ "$main_choice" = "2" ]; then
-  echo "🛠️  Building image for $MACHINE..."
-  TARGET="sa-image-minimal"
+  nice -n 10 bitbake sa-image-minimal
 
-  nice -n 10 bitbake "$TARGET"
-
-  echo ""
-  echo "✅ Image built."
-  echo "   Path: $PWD/tmp-musl/deploy/images/$MACHINE/"
+  echo "✅ Image ready → $PWD/tmp-musl/deploy/images/$MACHINE/"
   exit 0
 fi
 
-
 # ────────────────────────────────────────────────
-# 5️⃣ Run QEMU (direct, no runqemu)
+# 3️⃣ Run QEMU
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "3" ]; then
-  echo "🖥️  Run QEMU (direct mode, SDL)…"
+  echo "🖥️ Running QEMU…"
 
-  CONF=$(ls -1 build-qemu/tmp-musl/deploy/images/qemuarm64/*.qemuboot.conf 2>/dev/null | tail -n 1 || true)
-  if [ -z "$CONF" ] || [ ! -f "$CONF" ]; then
-    echo "❌ No .qemuboot.conf found. Build QEMU image first (menu → 2 → QEMU)."
-    exit 1
-  fi
+  CONF=$(ls -t build-qemu/tmp-musl/deploy/images/qemuarm64/*.qemuboot.conf | head -n 1)
+  [ -f "$CONF" ] || { echo "❌ Build QEMU image first."; exit 1; }
 
-  echo "📄 Using: $CONF"
-  IMG_DIR="$(dirname "$CONF")"
+  IMG_DIR=$(dirname "$CONF")
+  KERNEL=$(grep kernel_image "$CONF" | cut -d= -f2)
+  IMG=$(grep image_name "$CONF" | cut -d= -f2)
 
-  getv() { grep -E "^$1[[:space:]]*=" "$CONF" | sed 's/^[^=]*=\s*//'; }
-
-  KERNEL_IMG="$(getv kernel_imagetype)"
-  IMG_NAME="$(getv image_name)"
-  MEM="$(getv qb_mem)"
-  CPU_OPT="$(getv qb_cpu)"
-  MACH_OPT="$(getv QB_MACHINE)"
-  GPU_OPT="$(getv qb_graphics)"
-  DISPLAY_OPT="-display sdl,gl=off,show-cursor=on"
-
-  [ -z "$KERNEL_IMG" ] && KERNEL_IMG="Image"
-  [ -z "$MEM" ] && MEM="1024"
-  [ -z "$CPU_OPT" ] && CPU_OPT="cortex-a72"
-  [[ "$CPU_OPT" == -cpu* ]] || CPU_OPT="-cpu $CPU_OPT"
-  [[ "$MACH_OPT" == -machine* ]] || MACH_OPT="-machine virt"
-  [[ "$GPU_OPT" == -device* ]] || GPU_OPT="-device virtio-gpu-pci"
-
-  KERNEL_PATH="$IMG_DIR/$KERNEL_IMG"
-  ROOTFS_PATH="$IMG_DIR/$IMG_NAME.ext4"
-
-  if [ ! -f "$KERNEL_PATH" ]; then
-    echo "❌ Kernel not found: $KERNEL_PATH"
-    exit 1
-  fi
-  if [ ! -f "$ROOTFS_PATH" ]; then
-    echo "❌ Rootfs not found: $ROOTFS_PATH"
-    exit 1
-  fi
-
-  echo "🚀 Launching qemu-system-aarch64…"
-  set -x
   exec qemu-system-aarch64 \
-    $MACH_OPT \
-    $CPU_OPT \
-    -m "$MEM" \
-    -smp 4 \
-    -kernel "$KERNEL_PATH" \
-    -drive if=virtio,format=raw,file="$ROOTFS_PATH" \
+    -machine virt \
+    -cpu cortex-a72 \
+    -m 1024 \
+    -kernel "$IMG_DIR/$KERNEL" \
+    -drive if=virtio,format=raw,file="$IMG_DIR/$IMG.ext4" \
     -append "root=/dev/vda rw console=ttyAMA0" \
-    $GPU_OPT \
-    $DISPLAY_OPT \
+    -device virtio-gpu-pci \
+    -display sdl \
     -device qemu-xhci -device usb-tablet -device usb-kbd \
-    -netdev user,id=net0,hostfwd=tcp::2222-:22 -device virtio-net-pci,netdev=net0
+    -netdev user,id=net0,hostfwd=tcp::2222-:22 \
+    -device virtio-net-pci,netdev=net0
 fi
 
 # ────────────────────────────────────────────────
-# 6️⃣ Build SDK (populate_sdk da sa-image-minimal)
+# 4️⃣ Build HOST SDK (buildtools-extended)
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "4" ]; then
-  echo "🧰 Building SDK for $MACHINE from sa-image-minimal..."
-  nice -n 10 bitbake sa-image-minimal -c populate_sdk
+  echo "🧰 Building HOST SDK..."
 
-  echo ""
-  echo "✅ SDK generated from sa-image-minimal!"
-  echo "   You can find it in: $PWD/tmp-musl/deploy/sdk/"
-  echo "   Install it with option [5]"
+  export TEMPLATECONF="../meta-sa/conf/templates/default"
+  TEMPLATECONF="$TEMPLATECONF" source poky/oe-init-build-env build-tools
+
+  nice -n 10 bitbake buildtools-extended-tarball
+
+  echo "✅ HOST SDK built → $PWD/tmp/deploy/sdk/"
   exit 0
 fi
 
 # ────────────────────────────────────────────────
-# 7️⃣ Install SDK generated from sa-image-minimal
+# 5️⃣ Install HOST SDK
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "5" ]; then
-  BASE_DIR="/opt/youngtimer-sdk"
+  BASE="/opt/youngtimer-sdk"
+  mkdir -p "$BASE"
 
-  echo ""
-  echo "📦 SDK Installer base → $BASE_DIR"
-  echo "────────────────────────────────"
+  SDK=$(ls build-tools/tmp-musl/deploy/sdk/*buildtools-extended*.sh | head -n 1)
+  [ -f "$SDK" ] || { echo "❌ No HOST SDK found."; exit 1; }
 
-  # ensure base dir exists and is writable
-  if [ ! -d "$BASE_DIR" ]; then
-    echo "ℹ️  Creating $BASE_DIR..."
-    if ! mkdir -p "$BASE_DIR" 2>/dev/null; then
-      echo "⚠️  Cannot create $BASE_DIR"
-      echo "   Try running with sudo or choose another path."
-      exit 1
-    fi
-  elif [ ! -w "$BASE_DIR" ]; then
-    echo "⚠️  No write access to $BASE_DIR"
-    echo "   Try running with sudo or choose another path."
-    exit 1
-  fi
+  DEST="$BASE/$(basename "$SDK" .sh)"
+  sh "$SDK" -d "$DEST" -y
 
-  # find any SDK for sa-image-minimal (poky/oecore/nodistro ecc.)
-    SDKS=()
-  # RPi4 SDKs
-  while IFS= read -r f; do SDKS+=("$f"); done < <(
-    find build-rpi4/tmp-musl/deploy/sdk \
-      -name "*sa-image-minimal*toolchain*.sh" 2>/dev/null || true
-  )
-  # QEMU SDKs
-  while IFS= read -r f; do SDKS+=("$f"); done < <(
-    find build-qemu/tmp-musl/deploy/sdk \
-      -name "*sa-image-minimal*toolchain*.sh" 2>/dev/null || true
-  )
+  echo "✅ Installed HOST SDK → $DEST"
+  echo "Run:"
+  echo "  source $DEST/environment-setup-x86_64-pokysdk-linux"
+  exit 0
+fi
 
-  if [ ${#SDKS[@]} -eq 0 ]; then
-    echo "❌ No SDK installer found. Build it first with option [4] on Raspberry Pi 4 target."
-    exit 1
-  fi
+# ────────────────────────────────────────────────
+# 6️⃣ Build TARGET SDK (meta-toolchain)
+# ────────────────────────────────────────────────
+if [ "$main_choice" = "6" ]; then
+  choose_target
 
-  # if multiple SDKs exist, ask which one
+  echo "🧰 Building TARGET SDK ($MACHINE)..."
+
+  export TEMPLATECONF="../meta-sa/conf/templates/default"
+  MACHINE="$MACHINE" TEMPLATECONF="$TEMPLATECONF" source poky/oe-init-build-env "$BUILDDIR"
+
+  # Aggiungiamo i dev Qt allo SDK target
+  echo 'TOOLCHAIN_TARGET_TASK:append = " qtbase-dev qtdeclarative-dev qtmultimedia-dev "' >> conf/local.conf
+
+  nice -n 10 bitbake meta-toolchain
+
+  echo "✅ TARGET SDK built → $PWD/tmp/deploy/sdk/"
+  exit 0
+fi
+
+# ────────────────────────────────────────────────
+# 7️⃣ Install TARGET SDK
+# ────────────────────────────────────────────────
+if [ "$main_choice" = "7" ]; then
+  BASE="/opt/youngtimer-sdk"
+  mkdir -p "$BASE"
+
+  SDKS=()
+  for f in build-qemu/tmp-musl/deploy/sdk/*toolchain*.sh; do [ -f "$f" ] && SDKS+=("$f"); done
+  for f in build-rpi4/tmp-musl/deploy/sdk/*toolchain*.sh; do [ -f "$f" ] && SDKS+=("$f"); done
+
+  [ ${#SDKS[@]} -gt 0 ] || { echo "❌ No TARGET SDK found."; exit 1; }
+
   if [ ${#SDKS[@]} -gt 1 ]; then
-    echo "⚠️ Multiple SDK installers found:"
+    echo "Multiple TARGET SDKs:"
     i=1
-    for s in "${SDKS[@]}"; do
-      echo "  $i) $s"
-      ((i++))
-    done
-    echo ""
-    read -rp "Select one to install [1-${#SDKS[@]}]: " choice
-    SDK="${SDKS[$((choice-1))]}"
+    for s in "${SDKS[@]}"; do echo " $i) $s"; ((i++)); done
+    read -rp "Choose: " n
+    SDK="${SDKS[$((n-1))]}"
   else
     SDK="${SDKS[0]}"
   fi
 
-  SDK_BASENAME=$(basename "$SDK" .sh)
-  SDK_INSTALL_DIR="${BASE_DIR}/${SDK_BASENAME}"
+  DEST="$BASE/$(basename "$SDK" .sh)"
+  sh "$SDK" -d "$DEST" -y
 
-  echo ""
-  echo "➡️  Installing SDK:"
-  echo "   $SDK"
-  echo "→ Target dir:"
-  echo "   $SDK_INSTALL_DIR"
-  echo ""
-
-  mkdir -p "$SDK_INSTALL_DIR"
-
-  sh "$SDK" -d "$SDK_INSTALL_DIR" -y
-
-  echo ""
-  echo "✅ SDK installed in:"
-  echo "   $SDK_INSTALL_DIR"
-  echo ""
-  echo "To activate for RPi4 (toolchain env), run something like:"
-  echo "  source ${SDK_INSTALL_DIR}/environment-setup-aarch64-poky-linux*"
+  echo "✅ Installed TARGET SDK → $DEST"
+  echo "Activate with:"
+  echo "  source $DEST/environment-setup-aarch64-*-linux"
   exit 0
 fi
 
 # ────────────────────────────────────────────────
-# 8️⃣ Flash image to SD card (safe mode)
+# 8️⃣ Flash SD
 # ────────────────────────────────────────────────
-if [ "$main_choice" = "6" ]; then
-  echo "💾 Flash image to SD card"
-  echo "────────────────────────────────"
-  echo ""
-
+if [ "$main_choice" = "8" ]; then
   IMG_DIR="build-rpi4/tmp-musl/deploy/images/raspberrypi4-64"
-  IMG_FILE=$(ls -t ${IMG_DIR}/*.wic.bz2 2>/dev/null | head -n 1)
+  IMG=$(ls -t "$IMG_DIR"/*.wic.bz2 | head -n 1)
 
-  if [ -z "$IMG_FILE" ]; then
-    echo "❌ No image found in ${IMG_DIR}"
-    exit 1
-  fi
+  [ -f "$IMG" ] || { echo "❌ No image found."; exit 1; }
 
-  BOOT_DEV=$(findmnt -no SOURCE / | sed 's/[0-9]*$//')
-  echo "🧠 Host boot device detected: $BOOT_DEV"
-  echo ""
-  echo "📦 Found image:"
-  echo "   $IMG_FILE"
-  echo ""
-  lsblk -dpno NAME,SIZE,MODEL,TYPE |
-    grep -vE "loop|${BOOT_DEV##*/}|nvme" |
-    grep "disk" || true
-  echo ""
-  read -p "⚠️  Enter SD device (ex: /dev/sdb): " DEV
+  lsblk -dpno NAME,SIZE,MODEL,TYPE | grep disk
+  read -rp "SD device (ex: /dev/sdb): " DEV
+  read -rp "Type YES to confirm: " OK
+  [ "$OK" = "YES" ] || exit 0
 
-  if [ "$DEV" = "$BOOT_DEV" ]; then
-    echo "🚫 Refusing to write to current boot device ($BOOT_DEV)!"
-    exit 1
-  fi
-
-  if [ ! -b "$DEV" ]; then
-    echo "❌ Device $DEV not found."
-    exit 1
-  fi
-
-  echo ""
-  read -p "⚡ Confirm flashing to $DEV ? (yes/no): " CONFIRM
-  if [ "$CONFIRM" != "yes" ]; then
-    echo "🚫 Aborted."
-    exit 0
-  fi
-
-  echo ""
-  echo "🧹 Unmounting old partitions..."
   sudo umount ${DEV}?* 2>/dev/null || true
+  pv "$IMG" | bunzip2 | sudo dd of="$DEV" bs=4M conv=fsync status=progress
 
-  echo "🔥 Writing image (this may take a few minutes)..."
-  pv "$IMG_FILE" | bunzip2 | sudo dd of="$DEV" bs=4M conv=fsync status=progress
-
-  echo ""
-  echo "✅ Done!"
-  echo "   You can now remove and boot the SD card."
+  echo "✅ Flash done!"
   exit 0
 fi
