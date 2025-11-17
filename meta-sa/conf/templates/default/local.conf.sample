@@ -5,9 +5,9 @@ PACKAGE_CLASSES = "package_ipk"
 BB_NUMBER_THREADS = "${@max(1, oe.utils.cpu_count() - 1)}"
 PARALLEL_MAKE = "-j${@max(1, oe.utils.cpu_count() - 1)}"
 BB_TASK_MEMORY = "12000"
-BB_PRESSURE_MAX_CPU = "800"
-BB_PRESSURE_MAX_IO = "800"
-BB_PRESSURE_MAX_MEM = "800"
+BB_PRESSURE_MAX_CPU = "2600"
+BB_PRESSURE_MAX_IO = "2600"
+BB_PRESSURE_MAX_MEM = "2600"
 
 # Mirror alternativi
 # ── Mirrors robusti (coppie: pattern -> mirror) ─────────────────
@@ -92,3 +92,4 @@ PACKAGE_EXCLUDE += "qtquick3dspatialaudio"
 PACKAGE_EXCLUDE += "qtquick3d-assimp"
 PACKAGE_EXCLUDE += "qtquick3d-tools"
 
+SDKIMAGE_FEATURES:append = " staticdev-pkgs"

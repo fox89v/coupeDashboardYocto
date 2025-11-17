@@ -1,92 +1,47 @@
-SUMMARY = "Minimal image (fast boot, EGL test, autostart)"
+SUMMARY = "Minimal image (Qt + fonts, QEMU virt)"
 LICENSE = "MIT"
 
 inherit core-image
 
-# -----------------------------------------------
-# Base image minimale
-# -----------------------------------------------
+# --- Base minimale ---
 IMAGE_FEATURES = ""
 IMAGE_FEATURES:remove = "splash package-management debug-tweaks"
 
 IMAGE_INSTALL = " \
-    busybox \
-    base-files \
-    base-passwd \
-    netbase \
-    udev \
-    dropbear \
-    egltest \
+    busybox base-files base-passwd netbase udev dropbear \
     mesa \
-    kmscube \
 "
 
-# Rimuove moduli Qt 3D e OpenSSL (non necessari)
-IMAGE_INSTALL:remove = "qtquick3d qtquick3d-dev qtquick3d-native qtquick3d-qmlplugins"
-IMAGE_INSTALL:remove = "openssl"
+# --- Rimozioni inutili ---
+IMAGE_INSTALL:remove = "qtquick3d qtquick3d-dev qtquick3d-native qtquick3d-qmlplugins openssl"
 
 IMAGE_LINGUAS = "en-us"
 
-# -----------------------------------------------
-# Qt + Font (aggiunti separatamente)
-# -----------------------------------------------
+# --- Qt (runtime + dev + static) + font ---
 IMAGE_INSTALL:append = " \
-    qtbase \
-    qtdeclarative \
+    qtbase qtdeclarative \
     fontconfig \
-    ttf-dejavu-sans \
-    ttf-dejavu-sans-mono \
-    ttf-dejavu-serif \
+    ttf-dejavu-sans ttf-dejavu-sans-mono ttf-dejavu-serif \
+    qtbase-dev \
+    qtdeclarative-dev \
+    qtdeclarative-staticdev \
+    qtmultimedia-dev \
 "
 
-# -----------------------------------------------
-# Profilo shell per verificare lo stato EGL
-# -----------------------------------------------
-ROOTFS_POSTPROCESS_COMMAND += "egl_check_install; "
-
-egl_check_install() {
-    install -d ${IMAGE_ROOTFS}/etc/profile.d
-    cat << 'EOF' > ${IMAGE_ROOTFS}/etc/profile.d/eglcheck.sh
-#!/bin/sh
-echo ""
-echo "[EGL] Renderer info:"
-eglinfo 2>/dev/null | grep -E "Device|Vendor|Version" || echo "EGL check failed."
-echo ""
-EOF
-    chmod +x ${IMAGE_ROOTFS}/etc/profile.d/eglcheck.sh
-}
-
-# -----------------------------------------------
-# Configurazione QEMU (emulazione Raspberry Pi 4)
-# -----------------------------------------------
-QB_SYSTEM_NAME          = "qemu-system-aarch64"
-QB_MACHINE              = "virt"
-QB_CPU                  = "cortex-a72"
-QB_MEM                  = "1024"
-QB_DISPLAY_OPT          = "-device virtio-gpu-pci -display sdl"
-QB_USB_OPT              = "-device qemu-xhci -device usb-tablet -device usb-kbd"
-QB_NETWORK_DEVICE       = "virtio-net-pci"
-QB_NET_OPT              = "-netdev user,id=net0,hostfwd=tcp::2222-:22 -device virtio-net-pci,netdev=net0"
-QB_DRIVE_TYPE           = "virtio"
+# --- QEMU (virt emulation) ---
+QB_SYSTEM_NAME  = "qemu-system-aarch64"
+QB_MACHINE      = "virt"
+QB_CPU          = "cortex-a72"
+QB_MEM          = "1024"
+QB_DISPLAY_OPT  = "-device virtio-gpu-pci -display sdl"
+QB_USB_OPT      = "-device qemu-xhci -device usb-tablet -device usb-kbd"
+QB_NETWORK_DEVICE = "virtio-net-pci"
+QB_NET_OPT      = "-netdev user,id=net0,hostfwd=tcp::2222-:22 -device virtio-net-pci,netdev=net0"
+QB_DRIVE_TYPE   = "virtio"
 QB_KERNEL_CMDLINE_APPEND = "console=ttyAMA0 console=tty0 root=/dev/vda rw mem=1024M net.ifnames=0 quiet loglevel=0 vt.global_cursor_default=0"
 
-# -----------------------------------------------
-# Avvio diretto dell'app Qt (senza systemd)
-# -----------------------------------------------
-ROOTFS_POSTPROCESS_COMMAND += "replace_init_with_app; "
+# --- Qt tools per SDK (host: moc, rcc, qmlcachegen, ecc.) ---
+TOOLCHAIN_HOST_TASK:append = " \
+    nativesdk-packagegroup-qt6-toolchain-host \
+"
 
-replace_init_with_app() {
-    mv ${IMAGE_ROOTFS}/sbin/init ${IMAGE_ROOTFS}/sbin/init.orig || true
-
-    cat << 'EOF' > ${IMAGE_ROOTFS}/sbin/init
-#!/bin/sh
-mount -t proc none /proc
-mount -t sysfs none /sys
-mount -t devtmpfs none /dev
-echo "Starting app-qt (EGLFS)..."
-/usr/bin/app-qt
-echo "app-qt exited, dropping to shell"
-/bin/sh
-EOF
-    chmod +x ${IMAGE_ROOTFS}/sbin/init
-}
