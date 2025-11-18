@@ -55,3 +55,5 @@ PATH=/opt/youngtimer-sdk/x86_64-buildtools-extended-nativesdk-standalone-nodistr
 QT_HOST_PATH=/home/fox/Qt/6.7.3/gcc_64
 QT_HOST_PATH_CMAKE_DIR=/home/fox/Qt/6.7.3/gcc_64/lib/cmake
 
+## 6. Apertura progetto
+Configurare come cartella di build: build-qtcreator

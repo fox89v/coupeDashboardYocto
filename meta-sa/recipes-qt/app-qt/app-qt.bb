@@ -9,7 +9,7 @@ SRC_URI = "file://CMakeLists.txt \
            file://main.qml \
            file://resources.qrc \
            file://app-init.sh \
-          "
+"
 
 S = "${WORKDIR}"
 
@@ -28,10 +28,6 @@ do_install() {
     install -d ${D}${bindir}
     install -m 0755 ${B}/app-qt ${D}${bindir}/
 
-    # install init wrapper
     install -d ${D}/sbin
-    install -m 0755 ${WORKDIR}/app-init.sh ${D}/sbin/app-init
-
-    # make app-init the system init
-    ln -sf app-init ${D}/sbin/init
+    install -m 0755 ${WORKDIR}/app-init.sh ${D}/sbin/init
 }
