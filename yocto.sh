@@ -1,4 +1,15 @@
 #!/usr/bin/env bash
+
+# ────────────────────────────────────────────────
+# ⚡ Quick DEV mode: ./yocto -d
+# ────────────────────────────────────────────────
+if [ "$1" = "-d" ]; then
+    quick_mode="dev"
+    main_choice="3"
+else
+    quick_mode=""
+fi
+
 set -e
 cd "$(dirname "$0")"
 
@@ -36,20 +47,22 @@ check_deps() {
 check_deps
 
 # ────────────────────────────────────────────────
-# 🚀 Menu
+# 🚀 Menu (solo se NON quick mode)
 # ────────────────────────────────────────────────
-echo ""
-echo "🚀 Yocto Project Manager"
-echo "────────────────────────────────────────────"
-echo "1) Configure project (clone layers)"
-echo "2) Build custom IMAGE (sa-image-minimal)"
-echo "3) Run QEMU"
-echo "4) Build HOST SDK (buildtools-extended)"
-echo "5) Install HOST SDK"
-echo "6) Build TARGET SDK (meta-toolchain)"
-echo "7) Install TARGET SDK"
-echo "8) Flash SD card"
-read -rp "Choice [1-8]: " main_choice
+if [ "$quick_mode" != "dev" ]; then
+    echo ""
+    echo "🚀 Yocto Project Manager"
+    echo "────────────────────────────────────────────"
+    echo "1) Configure project (clone layers)"
+    echo "2) Build custom IMAGE (sa-image-minimal)"
+    echo "3) Run QEMU"
+    echo "4) Build HOST SDK (buildtools-extended)"
+    echo "5) Install HOST SDK"
+    echo "6) Build TARGET SDK (meta-toolchain)"
+    echo "7) Install TARGET SDK"
+    echo "8) Flash SD card"
+    read -rp "Choice [1-8]: " main_choice
+fi
 
 # ────────────────────────────────────────────────
 # 1️⃣ Clone layers
@@ -129,6 +142,21 @@ fi
 if [ "$main_choice" = "3" ]; then
   echo "🖥️ Running QEMU…"
 
+  # scelta DEV/PROD
+  if [ "$quick_mode" = "dev" ]; then
+      MODE_FLAG="SA_MODE=dev"
+      echo "🔧 Quick start in DEV mode"
+  else
+      read -p "Choose mode [d=DEV / p=PROD]: " mode
+      if [ "$mode" = "d" ]; then
+          MODE_FLAG="SA_MODE=dev"
+          echo "🔧 Starting in DEV mode"
+      else
+          MODE_FLAG=""
+          echo "🚗 Starting in PROD mode"
+      fi
+  fi
+
   CONF=$(ls -t build-qemu/tmp-musl/deploy/images/qemuarm64/*.qemuboot.conf | head -n 1)
   [ -f "$CONF" ] || { echo "❌ Build QEMU image first."; exit 1; }
 
@@ -142,7 +170,7 @@ if [ "$main_choice" = "3" ]; then
     -m 1024 \
     -kernel "$IMG_DIR/$KERNEL" \
     -drive if=virtio,format=raw,file="$IMG_DIR/$IMG.ext4" \
-    -append "root=/dev/vda rw console=ttyAMA0" \
+    -append "root=/dev/vda rw console=ttyAMA0 $MODE_FLAG" \
     -device virtio-gpu-pci \
     -display sdl \
     -device qemu-xhci -device usb-tablet -device usb-kbd \
@@ -195,7 +223,6 @@ if [ "$main_choice" = "6" ]; then
   export TEMPLATECONF="../meta-sa/conf/templates/default"
   MACHINE="$MACHINE" TEMPLATECONF="$TEMPLATECONF" source poky/oe-init-build-env "$BUILDDIR"
 
-  # Aggiungiamo i dev Qt allo SDK target
   echo 'TOOLCHAIN_TARGET_TASK:append = " qtbase-dev qtdeclarative-dev qtmultimedia-dev "' >> conf/local.conf
 
   nice -n 10 bitbake meta-toolchain
