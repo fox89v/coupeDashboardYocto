@@ -15,5 +15,5 @@ add_executable(app-qt
 target_link_libraries(app-qt
     PRIVATE Qt6::Gui Qt6::Qml Qt6::Quick
 )
-install(TARGETS app-qt RUNTIME DESTINATION usr/bin)
+install(TARGETS app-qt RUNTIME DESTINATION /usr/bin)
 
