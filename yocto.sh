@@ -133,8 +133,8 @@ if [ "$main_choice" = "3" ]; then
   [ -f "$CONF" ] || { echo "❌ Build QEMU image first."; exit 1; }
 
   IMG_DIR=$(dirname "$CONF")
-  KERNEL=$(grep kernel_image "$CONF" | cut -d= -f2)
-  IMG=$(grep image_name "$CONF" | cut -d= -f2)
+  KERNEL=$(grep kernel_image "$CONF" | cut -d= -f2 | xargs)
+  IMG=$(grep image_name "$CONF" | cut -d= -f2 | xargs)
 
   exec qemu-system-aarch64 \
     -machine virt \
