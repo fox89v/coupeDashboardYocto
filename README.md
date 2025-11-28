@@ -25,11 +25,13 @@ Il laboratorio Open Youngtimer Lab utilizzerà questa toolchain come base per co
 
 ### ✅ Funzionalità principali
 
-- Setup automatico dei layer (`poky`, `meta-openembedded`, `meta-raspberrypi`, `meta-qt6`, `meta-sa`)  
-- Costruzione di immagini personalizzate (`sa-image-minimal`)  
-- Esecuzione diretta in **QEMU** (ARM64)  
-- Supporto a **Raspberry Pi 4 / CM5**  
+- Setup automatico dei layer (`poky`, `meta-openembedded`, `meta-raspberrypi`, `meta-qt6`, `meta-sa`)
+- Costruzione di immagini personalizzate (`sa-image-minimal`)
+- Esecuzione diretta in **QEMU** (ARM64)
+- Supporto a **Raspberry Pi 4 / CM5**
 - Generazione e installazione di SDK cross-compile
+- Flash di una SD card pronta all'uso
+- Modalità **DEV** veloce per avviare QEMU senza passaggi interattivi
 
 ### 💡 Utilizzo
 
@@ -39,6 +41,10 @@ Prerequisiti consigliati:
 - Dipendenze base: `git`, `tar`, `xz-utils`, `python3`, `gawk`, `wget`
 - Connessione Internet stabile (per scaricare sorgenti e layer)
 - Facoltativo: ambiente **Docker** o VM dedicata per non contaminare il sistema host
+
+All'avvio lo script verifica automaticamente l'installazione delle dipendenze Yocto più comuni
+(`git`, `gawk`, `wget`, `diffstat`, `cmake`, `qemu-system-arm`, ecc.).
+Se mancano pacchetti propone il comando `apt` per installarli prima di proseguire.
 
 Clone il repository e lancia lo script principale:
 
@@ -51,10 +57,16 @@ Menu interattivo:
 | Opzione | Descrizione |
 |:--------:|:------------|
 | 1️⃣ | Clona e configura i layer necessari |
-| 2️⃣ | Compila l’immagine custom |
-| 3️⃣ | Avvia QEMU (emulazione ARM64) |
-| 4️⃣ | Crea SDK |
-| 5️⃣ | Installa SDK in `/opt/youngtimer-sdk` |
+| 2️⃣ | Compila l’immagine custom (QEMU o Raspberry Pi 4) |
+| 3️⃣ | Avvia QEMU (modalità DEV/PROD) |
+| 4️⃣ | Crea HOST SDK (`buildtools-extended`) |
+| 5️⃣ | Installa HOST SDK in `/opt/youngtimer-sdk` |
+| 6️⃣ | Crea TARGET SDK (`meta-toolchain`) |
+| 7️⃣ | Installa TARGET SDK in `/opt/youngtimer-sdk` |
+| 8️⃣ | Flash dell’immagine su SD card |
+
+Suggerimento: per avviare QEMU in modalità sviluppo senza passare dal menu usa
+`./yocto.sh -d`, che salta direttamente all'opzione **3️⃣** con flag `SA_MODE=dev`.
 
 ---
 
