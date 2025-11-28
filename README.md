@@ -33,6 +33,15 @@ Il laboratorio Open Youngtimer Lab utilizzerà questa toolchain come base per co
 
 ### 💡 Utilizzo
 
+Prerequisiti consigliati:
+
+- Distribuzione Linux (x86_64) con almeno **200 GB** liberi su disco
+- Dipendenze base: `git`, `tar`, `xz-utils`, `python3`, `gawk`, `wget`
+- Connessione Internet stabile (per scaricare sorgenti e layer)
+- Facoltativo: ambiente **Docker** o VM dedicata per non contaminare il sistema host
+
+Clone il repository e lancia lo script principale:
+
 ```bash
 chmod +x yocto.sh
 ./yocto.sh
@@ -57,7 +66,7 @@ cdy/
  ├── meta-sa/                 # Layer custom con ricette e immagini
  ├── Open_Youngtimer_Lab_MD_EN+IT/ # Documenti ufficiali dell'associazione
  ├── README.md                # Questo file
- └── LICENSE.txt
+└── LICENSE.txt
 ```
 
 ---
@@ -76,7 +85,7 @@ I documenti costitutivi e di progetto si trovano nella cartella [`Open_Youngtime
 | [Protocollo di intenti](./Open_Youngtimer_Lab_MD_EN+IT/IT/Protocollo_Intenti.md) | 🇮🇹 | Fondazione dell’associazione |
 | [Statuto](./Open_Youngtimer_Lab_MD_EN+IT/IT/Statuto.md) | 🇮🇹 | Regole interne |
 | [GoFundMe – Testo campagna](./Open_Youngtimer_Lab_MD_EN+IT/IT/GoFundMe_Text.md) | 🇮🇹 | Raccolta fondi ufficiale |
-| [Bylaws (EN)](./Open_Youngtimer_Lab_MD_EN+ITT/EN/Bylaws.md) | 🇬🇧 | English version |
+| [Bylaws (EN)](./Open_Youngtimer_Lab_MD_EN+IT/EN/Bylaws.md) | 🇬🇧 | English version |
 
 ---
 
