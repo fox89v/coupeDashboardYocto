@@ -68,6 +68,21 @@ Menu interattivo:
 Suggerimento: per avviare QEMU in modalità sviluppo senza passare dal menu usa
 `./yocto.sh -d`, che salta direttamente all'opzione **3️⃣** con flag `SA_MODE=dev`.
 
+### 📜 Cosa fa `yocto.sh` passo-passo
+
+Il file [`yocto.sh`](./yocto.sh) è interamente auto-consistente e gestisce sia le verifiche dell'host sia le operazioni di build. In sintesi:
+
+1. **Controllo dipendenze host** — verifica la presenza dei pacchetti `git`, `gawk`, `qemu-system-arm`, ecc. Se mancano, propone il comando `apt install` e consente di interrompere l'esecuzione in sicurezza.
+2. **Modalità interattiva o quick** — in assenza di `-d` mostra il menu numerato qui sopra; con `-d` esegue direttamente l'opzione **3️⃣** in modalità sviluppo (`SA_MODE=dev`).
+3. **Opzione 1: clonazione layer** — scarica i branch `scarthgap` di `poky`, `meta-openembedded`, `meta-raspberrypi` e il branch `6.7` di `meta-qt6`; crea inoltre le cartelle `downloads/` e `sstate-cache/` condivise tra le build.
+4. **Opzione 2: build immagine** — chiede il target (`qemuarm64` o `raspberrypi4-64`), prepara un build directory dedicato (`build-qemu` o `build-rpi4`) usando `TEMPLATECONF=../meta-sa/conf/templates/default` e aggiunge automaticamente i layer mancanti prima di lanciare `bitbake sa-image-minimal`. Gli output finiscono in `build-*/tmp-musl/deploy/images/<MACHINE>/`.
+5. **Opzione 3: avvio QEMU** — trova l’ultima immagine `qemuarm64` compilata e avvia `qemu-system-aarch64` con GPU virtio, input USB e porta SSH inoltrata (`hostfwd=tcp::2222-:22`). Il flag `SA_MODE=dev` abilita configurazioni di sviluppo nel boot argomento `console`.
+6. **Opzioni 4–5: HOST SDK** — genera `buildtools-extended-tarball` in `build-tools/tmp/deploy/sdk/` e installa lo script `.sh` risultante in `/opt/youngtimer-sdk/<nome-sdk>` (utile per compilare gli strumenti host).
+7. **Opzioni 6–7: TARGET SDK** — ripetono il flusso di build/installa per il toolchain destinato a `qemuarm64` o `raspberrypi4-64`, aggiungendo i pacchetti Qt (append di `qtbase-dev`, `qtdeclarative-dev`, `qtmultimedia-dev`). Dopo l’installazione, attiva l’ambiente con `source <sdk>/environment-setup-aarch64-*-linux`.
+8. **Opzione 8: flash su SD** — individua l’ultima immagine `.wic.bz2` per Raspberry Pi 4, chiede conferma esplicita (`Type YES`) e la scrive sul device scelto tramite `dd` con progress bar `pv`.
+
+Ogni blocco termina con messaggi di stato chiari (✅ / ❌) e uscita immediata in caso di errori per evitare side-effect indesiderati.
+
 ---
 
 ## 🧱 Architettura del progetto
