@@ -26,7 +26,7 @@ EXTRA_OECMAKE += "\
 
 do_install() {
     install -d ${D}${bindir}
-    install -m 0755 ${B}/app-qt ${D}${bindir}/
+    install -m 0755 ${B}/sapp ${D}${bindir}/
 
     install -d ${D}/sbin
     install -m 0755 ${WORKDIR}/app-init.sh ${D}/sbin/init

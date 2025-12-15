@@ -75,7 +75,7 @@ PACKAGECONFIG:append_pn-qtbase = " gles2 eglfs"
 PACKAGECONFIG:append_pn-qtdeclarative = " quick quickcontrols2 tools"
 
 # pacchetti principali Qt grafici
-IMAGE_INSTALL:append = " qtbase qtdeclarative qtmultimedia qtshadertools app-qt"
+IMAGE_INSTALL:append = " qtbase qtdeclarative qtmultimedia qtshadertools sapp"
 
 # forza git:// -> https:// per i repo Qt
 BB_FETCH_PREMIRRORS:prepend = " \

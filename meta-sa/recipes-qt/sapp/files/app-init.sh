@@ -53,16 +53,16 @@ if [ "$SA_MODE" = "dev" ]; then
     chmod 666 /dev/dri/renderD128  2>/dev/null
     chmod 666 /dev/fb0             2>/dev/null
 
-    echo "[INIT] DEV mode → NOT starting app-qt"
+    echo "[INIT] DEV mode → NOT starting sapp"
     exec /bin/sh
 fi
 
 ###############################################################################
 # 4) PROD MODE → avvio minimale
 ###############################################################################
-echo "[INIT] PROD mode → starting app-qt"
+echo "[INIT] PROD mode → starting sapp"
 
-/usr/bin/app-qt
+/usr/bin/sapp
 
 # se l'app termina, fallback shell
 exec /bin/sh
