@@ -6,6 +6,10 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 SRC_URI = "file://CMakeLists.txt \
            file://main.cpp \
+           file://datahub.cpp \
+           file://datahub.h \
+           file://measure.cpp \
+           file://measure.h \
            file://main.qml \
            file://resources.qrc \
            file://app-init.sh \
@@ -23,6 +27,8 @@ EXTRA_OECMAKE += "\
  -DQt6Qml_DIR=${STAGING_LIBDIR}/cmake/Qt6Qml \
  -DQt6QmlTools_DIR=${STAGING_LIBDIR_NATIVE}/cmake/Qt6QmlTools \
 "
+
+RDEPENDS:${PN} += "sa-graphics"
 
 do_install() {
     install -d ${D}${bindir}
