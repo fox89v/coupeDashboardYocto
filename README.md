@@ -16,6 +16,8 @@ Questo repository unisce due componenti principali:
 
 Il laboratorio Open Youngtimer Lab utilizzerà questa toolchain come base per costruire **dashboard digitali, moduli sensori e strumenti di telemetria** completamente open-source.
 
+Nel repository convivono ricette Yocto e sorgenti Qt/QML: grazie al `CMakeLists.txt` di root puoi aprire l’intero workspace in QtCreator come progetto CMake e lavorare sugli stessi file che Yocto include via `EXTERNALSRC`.
+
 [Seguimi su WhatsApp](https://whatsapp.com/channel/0029Vb7HTF8It5s4jT0nj20P)
 
 
@@ -41,29 +43,7 @@ Prerequisiti consigliati:
 - Dipendenze base: `git`, `tar`, `xz-utils`, `python3`, `gawk`, `wget`
 - Connessione Internet stabile (per scaricare sorgenti e layer)
 - Facoltativo: ambiente **Docker** o VM dedicata per non contaminare il sistema host
-
-All'avvio lo script verifica automaticamente l'installazione delle dipendenze Yocto più comuni
-(`git`, `gawk`, `wget`, `diffstat`, `cmake`, `qemu-system-arm`, ecc.).
-Se mancano pacchetti propone il comando `apt` per installarli prima di proseguire.
-
-Clone il repository e lancia lo script principale:
-
-```bash
-chmod +x yocto.sh
-./yocto.sh
-```
-
-Menu interattivo:
-| Opzione | Descrizione |
-|:--------:|:------------|
-| 1️⃣ | Clona e configura i layer necessari |
-| 2️⃣ | Compila l’immagine custom (QEMU o Raspberry Pi 4) |
-| 3️⃣ | Avvia QEMU (modalità DEV/PROD) |
-| 4️⃣ | Crea HOST SDK (`buildtools-extended`) |
-| 5️⃣ | Installa HOST SDK in `/opt/youngtimer-sdk` |
-| 6️⃣ | Crea TARGET SDK (`meta-toolchain`) |
-| 7️⃣ | Installa TARGET SDK in `/opt/youngtimer-sdk` |
-| 8️⃣ | Flash dell’immagine su SD card |
+@@ -67,59 +69,80 @@ Menu interattivo:
 
 Suggerimento: per avviare QEMU in modalità sviluppo senza passare dal menu usa
 `./yocto.sh -d`, che salta direttamente all'opzione **3️⃣** con flag `SA_MODE=dev`.
@@ -89,12 +69,33 @@ Ogni blocco termina con messaggi di stato chiari (✅ / ❌) e uscita immediata 
 
 ```
 cdy/
- ├── yocto.sh                 # Script principale per build Yocto
- ├── meta-sa/                 # Layer custom con ricette e immagini
- ├── Open_Youngtimer_Lab_MD_EN+IT/ # Documenti ufficiali dell'associazione
- ├── README.md                # Questo file
-└── LICENSE.txt
+ ├── CMakeLists.txt                  # Workspace CMake per QtCreator (subdir qmllib + sapp)
+ ├── yocto.sh                        # Script principale per build Yocto
+ ├── meta-sa/                        # Layer custom con ricette, immagini e sorgenti condivisi
+ │    └── recipes-qt/
+ │         ├── qmllib/               # Modulo QML Sa.Graphics 1.0 (installato in /usr/lib/qml/Sa/Graphics)
+ │         ├── sapp/                 # Applicazione Qt6 che importa Sa.Graphics
+ │         └── packagegroups/        # Packagegroup che trascina modulo e app
+ ├── Open_Youngtimer_Lab_MD_EN+IT/   # Documenti ufficiali dell'associazione
+ ├── README.md                       # Questo file
+ └── LICENSE.txt
 ```
+
+---
+
+## 📦 Componenti Qt/QML inclusi
+
+- **Modulo QML `Sa.Graphics 1.0`** — sorgenti in `meta-sa/recipes-qt/qmllib/files` con `MyCircularGauge.qml` e `qmldir`; la ricetta installa il modulo in `/usr/lib/qml/Sa/Graphics` e dichiara `RDEPENDS` su `qtdeclarative-qmlplugins`, assicurando percorsi standard e dipendenze di runtime.
+- **Applicazione Qt6 `sapp`** — sorgenti in `meta-sa/recipes-qt/sapp/files` (CMake, `main.cpp`, `main.qml`, `app-init.sh`); importa `Sa.Graphics 1.0`, linka `Gui/Qml/Quick` e installa il binario in `/usr/bin` insieme allo script di init.
+- **Packagegroup e immagine** — `packagegroups-sa-qt` trascina modulo e app; l’immagine `sa-image-minimal` include Qt base/decl + packagegroup, mentre il template `local.conf.sample` abilita EGLFS e ottimizzazioni per QEMU/RPi.
+
+---
+
+## 🖥️ Sviluppo Qt/QML con QtCreator
+
+- **Apertura progetto**: importa il workspace dal `CMakeLists.txt` di root, che aggiunge le subdirectory `qmllib` e `sapp` e non richiede tool Yocto per configurare il progetto in IDE.
+- **Code model QML**: il `QML_IMPORT_PATH` è forzato su `meta-sa/recipes-qt/qmllib/files`, così QtCreator risolve `Sa.Graphics` usando gli stessi sorgenti che Yocto incorpora tramite `EXTERNALSRC`.
+- **Separazione build**: le build Yocto restano gestite da `yocto.sh` e dal template `TEMPLATECONF`; in IDE puoi usare un kit desktop per iterare su QML/C++ senza incrociare la toolchain cross. Per validare sul target ricompila i pacchetti o l’immagine (`bitbake sa-image-minimal`).
 
 ---
 
