@@ -13,7 +13,12 @@ add_executable(sapp
 )
 
 target_link_libraries(sapp
-    PRIVATE Qt6::Gui Qt6::Qml Qt6::Quick
+    PRIVATE
+        Qt6::Gui
+        Qt6::Qml
+        Qt6::Quick
 )
-install(TARGETS sapp RUNTIME DESTINATION /usr/bin)
 
+qt_import_qml_plugins(sapp)
+
+install(TARGETS sapp RUNTIME DESTINATION /usr/bin)

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import Sa.Graphics 1.0
 
 ApplicationWindow {
     visible: true
@@ -115,6 +116,10 @@ ApplicationWindow {
             border.width: 2
         }
 
+        MyCircularGauge {
+            width: 300
+            height: 300
+        }
 
     }
 }

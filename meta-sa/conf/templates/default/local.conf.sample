@@ -93,3 +93,7 @@ PACKAGE_EXCLUDE += "qtquick3d-assimp"
 PACKAGE_EXCLUDE += "qtquick3d-tools"
 
 SDKIMAGE_FEATURES:append = " staticdev-pkgs"
+
+
+EXTRA_IMAGE_FEATURES += "debug-tweaks"
+TOOLCHAIN_TARGET_TASK:append = " packagegroups-sa-qt"

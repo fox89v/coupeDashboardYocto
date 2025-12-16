@@ -16,6 +16,7 @@ build*/bitbake.sock
 build*/pseudo/
 build*/tmp-glibc/
 build*/tmp-musl/
+build/
 
 # Explicit build directories
 build-qemu/

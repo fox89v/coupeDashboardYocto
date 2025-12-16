@@ -16,6 +16,7 @@ S = "${WORKDIR}"
 inherit qt6-cmake
 
 DEPENDS += "qtbase qtdeclarative qtdeclarative-native"
+RDEPENDS:${PN} += "qmllib"
 
 EXTRA_OECMAKE += "\
  -DCMAKE_PREFIX_PATH=${STAGING_LIBDIR}/cmake:${STAGING_LIBDIR_NATIVE}/cmake \

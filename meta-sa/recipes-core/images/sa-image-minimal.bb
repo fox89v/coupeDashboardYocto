@@ -18,6 +18,8 @@ IMAGE_INSTALL = " \
     qtmultimedia-dev \
 "
 
+IMAGE_INSTALL:append = " packagegroups-sa-qt"
+
 EXTRA_IMAGE_FEATURES += "ssh-server-openssh"
 IMAGE_INSTALL:append = " openssh openssh-sftp-server openssh-keygen "
 IMAGE_INSTALL:append = " rsync "
