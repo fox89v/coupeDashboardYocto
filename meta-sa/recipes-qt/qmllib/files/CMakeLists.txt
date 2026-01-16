@@ -19,7 +19,7 @@ qt_add_qml_module(sa_graphics_module
 
 include(GNUInstallDirs)
 
-install(TARGETS sa_graphics_module
+install(TARGETS sa_graphics_module sa_graphics_moduleplugin
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/qml/Sa/Graphics
 )
 
