@@ -97,6 +97,22 @@ cdy/
 - **Code model QML**: il `QML_IMPORT_PATH` è forzato su `meta-sa/recipes-qt/qmllib/files`, così QtCreator risolve `Sa.Graphics` usando gli stessi sorgenti che Yocto incorpora tramite `EXTERNALSRC`.
 - **Separazione build**: le build Yocto restano gestite da `yocto.sh` e dal template `TEMPLATECONF`; in IDE puoi usare un kit desktop per iterare su QML/C++ senza incrociare la toolchain cross. Per validare sul target ricompila i pacchetti o l’immagine (`bitbake sa-image-minimal`).
 
+### 🧪 Test desktop (QML2_IMPORT_PATH)
+
+Per verificare il modulo `Sa.Graphics` su desktop con lo stesso layout Yocto (`<prefix>/<libdir>/qml/Sa/Graphics`):
+
+```bash
+cmake -S . -B build-desktop -DCMAKE_INSTALL_PREFIX=$HOME/cdy/sysroot
+cmake --build build-desktop
+cmake --install build-desktop
+```
+
+Avvio dell’app `sapp` (usa `lib64` se il tuo toolchain installa lì):
+
+```bash
+QML2_IMPORT_PATH=$HOME/cdy/sysroot/lib/qml ./sapp
+```
+
 ---
 
 ## 🚀 Open Youngtimer Lab
