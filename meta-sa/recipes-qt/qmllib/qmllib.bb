@@ -16,7 +16,7 @@ S = "${WORKDIR}"
 
 inherit qt6-cmake
 
-DEPENDS += "qtbase qtdeclarative"
+DEPENDS += "qtbase qtdeclarative qtbase-native qtdeclarative-native"
 RDEPENDS:${PN} += "qtdeclarative-qmlplugins"
 
 do_install:append() {
