@@ -21,4 +21,4 @@ target_link_libraries(sapp
 
 qt_import_qml_plugins(sapp)
 
-install(TARGETS sapp RUNTIME DESTINATION /usr/bin)
+install(TARGETS sapp RUNTIME DESTINATION bin)
