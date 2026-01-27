@@ -140,6 +140,15 @@ fi
 # 3️⃣ Run QEMU
 # ────────────────────────────────────────────────
 if [ "$main_choice" = "3" ]; then
+
+  # se QEMU è già su (SSH forward 2222 risponde), non rilanciare
+  if timeout 1 bash -lc 'ssh -p 2222 -o BatchMode=yes -o ConnectTimeout=1 \
+      -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+      root@127.0.0.1 true' >/dev/null 2>&1; then
+    echo "✅ QEMU già avviato (root@127.0.0.1:2222)"
+    exit 0
+  fi
+
   echo "🖥️ Running QEMU…"
 
   # scelta DEV/PROD
