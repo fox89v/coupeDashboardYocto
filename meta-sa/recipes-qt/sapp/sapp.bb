@@ -17,6 +17,7 @@ inherit qt6-cmake
 
 DEPENDS += "qtbase qtdeclarative qtdeclarative-native qmllib"
 RDEPENDS:${PN} += "qmllib"
+FILES:${PN} += "${sbindir}/init"
 
 EXTRA_OECMAKE += "\
  -DCMAKE_PREFIX_PATH=${STAGING_LIBDIR}/cmake:${STAGING_LIBDIR_NATIVE}/cmake \
@@ -25,10 +26,7 @@ EXTRA_OECMAKE += "\
  -DQt6QmlTools_DIR=${STAGING_LIBDIR_NATIVE}/cmake/Qt6QmlTools \
 "
 
-do_install() {
-    install -d ${D}${bindir}
-    install -m 0755 ${B}/sapp ${D}${bindir}/
-
-    install -d ${D}/sbin
-    install -m 0755 ${WORKDIR}/app-init.sh ${D}/sbin/init
+do_install:append() {
+    install -d ${D}${sbindir}
+    install -m 0755 ${WORKDIR}/app-init.sh ${D}${sbindir}/init
 }
