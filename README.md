@@ -115,6 +115,40 @@ QML2_IMPORT_PATH=$HOME/cdy/sysroot/lib/qml ./sapp
 
 ---
 
+## 🧩 Qt Creator (kit Desktop + kit Yocto)
+
+Per lavorare in modo fluido, usa **due sysroot separati** e due kit distinti:
+
+- **Desktop** → `~/cdy/sysroot-desktop`
+- **Yocto** → `~/cdy/sysroot-yocto`
+
+### Impostazioni consigliate per ciascun kit
+
+1) **CMake install prefix**  
+   - Desktop: `CMAKE_INSTALL_PREFIX=~/cdy/sysroot-desktop`  
+   - Yocto: `CMAKE_INSTALL_PREFIX=~/cdy/sysroot-yocto`
+
+2) **Build step**  
+   Assicurati che esista lo step **“CMake Install”**  
+   (oppure uno step custom equivalente a `cmake --install <buildDir>`).
+
+3) **Run Environment**  
+   - Desktop: `QML2_IMPORT_PATH=~/cdy/sysroot-desktop/lib/qml` (o `lib64` se necessario)  
+   - Yocto: `QML2_IMPORT_PATH=~/cdy/sysroot-yocto/lib/qml` (o `lib64` se necessario)
+
+### Nota importante (QML rosso nel kit Yocto)
+
+Il rosso nell’editor QML **non indica un errore reale**: è un limite di Qt Creator.  
+Il plugin QML del kit Yocto è compilato per **ARM**, mentre Qt Creator gira su **x86_64** e **non riesce a estrarre i metadata**: per questo segnala import in rosso.  
+**Build/deploy e runtime sul target non sono impattati**.
+
+### Workflow consigliato
+
+- **Kit Desktop** → editing QML (editor pulito)  
+- **Kit Yocto** → build/deploy sul target
+
+---
+
 ## 🚀 Open Youngtimer Lab
 
 Open Youngtimer Lab è un’associazione in formazione nata per condividere **strumenti embedded open-source** per le auto youngtimer.  
