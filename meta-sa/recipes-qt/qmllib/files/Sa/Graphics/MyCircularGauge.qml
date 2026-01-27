@@ -1,4 +1,5 @@
 import QtQuick 2.15
+import Sa.Graphics 1.0
 
 Item {
     id: root
@@ -7,6 +8,8 @@ Item {
     property real startAngle: -140
     property real endAngle: 140
     property Component needle: defaultNeedle
+
+    Component.onCompleted: console.log(GraphicsUtils.clamp(12,0,10))
 
     readonly property real normalizedValue: measure && measure.normalized !== undefined
                                          ? Math.max(0, Math.min(1, measure.normalized))

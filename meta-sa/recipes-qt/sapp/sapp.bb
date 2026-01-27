@@ -15,7 +15,7 @@ S = "${WORKDIR}"
 
 inherit qt6-cmake
 
-DEPENDS += "qtbase qtdeclarative qtdeclarative-native"
+DEPENDS += "qtbase qtdeclarative qtdeclarative-native qmllib"
 RDEPENDS:${PN} += "qmllib"
 
 EXTRA_OECMAKE += "\

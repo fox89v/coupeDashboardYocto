@@ -17,6 +17,7 @@ target_link_libraries(sapp
         Qt6::Gui
         Qt6::Qml
         Qt6::Quick
+        sa_graphics_module
 )
 
 qt_import_qml_plugins(sapp)
