@@ -4,6 +4,7 @@ SRC_URI += "file://cfg/disable-md-raid.cfg \
             file://disable-md-raid.scc"
 
 KERNEL_FEATURES:append = " disable-md-raid.scc"
+KERNEL_CONFIG_FRAGMENTS:append = " cfg/disable-md-raid.cfg"
 
 do_kernel_configme:prepend() {
     bbnote "KERNEL_FEATURES=${KERNEL_FEATURES}"
