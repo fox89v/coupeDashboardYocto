@@ -1,37 +1,25 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
-SRC_URI += "file://disable-md-raid.cfg"
-KERNEL_CONFIG_FRAGMENTS += "file://disable-md-raid.cfg"
+SRC_URI += "file://disable-md-raid.cfg \
+            file://disable-md-raid.scc"
 
-do_configure:append() {
-    if [ ! -e ${B}/.config ]; then
-        bbfatal "Kernel .config missing; cannot verify RAID6/MD settings."
-    fi
+KERNEL_FEATURES:append = " cfg/disable-md-raid.scc"
 
-    if [ -x ${S}/scripts/config ]; then
-        config_updated=0
+do_kernel_configme:prepend() {
+    bbnote "KERNEL_FEATURES=${KERNEL_FEATURES}"
+}
 
-        if grep -qE "^(CONFIG_MD=|# CONFIG_MD is not set)" ${B}/.config; then
-            ${S}/scripts/config --file ${B}/.config --disable MD
-            config_updated=1
-        fi
+python do_kernel_configcheck:append() {
+    import os
+    import re
 
-        if grep -qE "^(CONFIG_BLK_DEV_MD=|# CONFIG_BLK_DEV_MD is not set)" ${B}/.config; then
-            ${S}/scripts/config --file ${B}/.config --disable BLK_DEV_MD
-            config_updated=1
-        fi
+    config_path = os.path.join(d.getVar("B"), ".config")
+    if not os.path.exists(config_path):
+        bb.fatal("Kernel .config missing; cannot verify RAID6/MD settings.")
 
-        if grep -qE "^(CONFIG_DM_RAID=|# CONFIG_DM_RAID is not set)" ${B}/.config; then
-            ${S}/scripts/config --file ${B}/.config --disable DM_RAID
-            config_updated=1
-        fi
+    with open(config_path, "r", encoding="utf-8") as config_file:
+        config_data = config_file.read()
 
-        if [ ${config_updated} -eq 1 ]; then
-            yes "" | oe_runmake olddefconfig
-        fi
-    fi
-
-    if grep -qE "^CONFIG_RAID6_PQ=[my]" ${B}/.config; then
-        bbfatal "CONFIG_RAID6_PQ is still enabled in the final kernel .config."
-    fi
+    if re.search(r"^CONFIG_RAID6_PQ=[my]$", config_data, re.MULTILINE):
+        bb.fatal("CONFIG_RAID6_PQ is still enabled in the final kernel .config.")
 }
