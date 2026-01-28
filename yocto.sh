@@ -179,7 +179,7 @@ if [ "$main_choice" = "3" ]; then
     -m 1024 \
     -kernel "$IMG_DIR/$KERNEL" \
     -drive if=virtio,format=raw,file="$IMG_DIR/$IMG.ext4" \
-    -append "root=/dev/vda rw console=ttyAMA0 $MODE_FLAG" \
+    -append "root=/dev/vda rw console=ttyAMA0 $MODE_FLAG raid=noautodetect" \
     -device virtio-gpu-pci \
     -display sdl \
     -device qemu-xhci -device usb-tablet -device usb-kbd \

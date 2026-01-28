@@ -46,7 +46,7 @@ IMAGE_FEATURES = ""
 IMAGE_FEATURES:remove = "splash package-management debug-tweaks"
 
 # ⚙️ console silenziosa e boot rapido
-APPEND += "quiet loglevel=0 vt.global_cursor_default=0"
+APPEND += "quiet loglevel=0 vt.global_cursor_default=0 raid=noautodetect"
 SERIAL_CONSOLE = "115200;ttyAMA0"
 QUIET_CONSOLE = "1"
 
@@ -96,4 +96,3 @@ SDKIMAGE_FEATURES:append = " staticdev-pkgs"
 
 
 EXTRA_IMAGE_FEATURES += "debug-tweaks"
-
