@@ -1,7 +1,7 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
-SRC_URI += "file://disable-md-raid.cfg \
-            file://disable-md-raid.scc"
+SRC_URI += "file://cfg/disable-md-raid.cfg \
+            file://cfg/disable-md-raid.scc"
 
 KERNEL_FEATURES:append = " cfg/disable-md-raid.scc"
 
