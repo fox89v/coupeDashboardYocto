@@ -9,12 +9,17 @@ do_kernel_configme:prepend() {
     bbnote "KERNEL_FEATURES=${KERNEL_FEATURES}"
 }
 
-do_kernel_configcheck:append() {
-    if [ ! -e ${B}/.config ]; then
-        bbfatal "Kernel .config missing; cannot verify RAID6/MD settings."
-    fi
+python do_kernel_configcheck:append() {
+    import os
+    import re
 
-    if grep -qE "^CONFIG_RAID6_PQ=[my]" ${B}/.config; then
-        bbfatal "CONFIG_RAID6_PQ is still enabled in the final kernel .config."
-    fi
+    config_path = os.path.join(d.getVar("B"), ".config")
+    if not os.path.exists(config_path):
+        bb.fatal("Kernel .config missing; cannot verify RAID6/MD settings.")
+
+    with open(config_path, "r", encoding="utf-8") as config_file:
+        config_data = config_file.read()
+
+    if re.search(r"^CONFIG_RAID6_PQ=[my]$", config_data, re.MULTILINE):
+        bb.fatal("CONFIG_RAID6_PQ is still enabled in the final kernel .config.")
 }
