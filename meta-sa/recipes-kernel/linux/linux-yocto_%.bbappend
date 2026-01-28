@@ -1,9 +1,9 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 SRC_URI += "file://cfg/disable-md-raid.cfg \
-            file://cfg/disable-md-raid.scc"
+            file://features/disable-md-raid.scc"
 
-KERNEL_FEATURES:append = " cfg/disable-md-raid.scc"
+KERNEL_FEATURES:append = " features/disable-md-raid.scc"
 
 do_kernel_configme:prepend() {
     bbnote "KERNEL_FEATURES=${KERNEL_FEATURES}"
