@@ -5,21 +5,16 @@ SRC_URI += "file://disable-md-raid.cfg \
 
 KERNEL_FEATURES:append = " cfg/disable-md-raid.scc"
 
-python do_kernel_configme:prepend() {
-    bb.note("KERNEL_FEATURES=%s" % d.getVar("KERNEL_FEATURES"))
+do_kernel_configme:prepend() {
+    bbnote "KERNEL_FEATURES=${KERNEL_FEATURES}"
 }
 
-python do_kernel_configcheck:append() {
-    import os
-    import re
+do_kernel_configcheck:append() {
+    if [ ! -e ${B}/.config ]; then
+        bbfatal "Kernel .config missing; cannot verify RAID6/MD settings."
+    fi
 
-    config_path = os.path.join(d.getVar("B"), ".config")
-    if not os.path.exists(config_path):
-        bb.fatal("Kernel .config missing; cannot verify RAID6/MD settings.")
-
-    with open(config_path, "r", encoding="utf-8") as config_file:
-        config_data = config_file.read()
-
-    if re.search(r"^CONFIG_RAID6_PQ=[my]$", config_data, re.MULTILINE):
-        bb.fatal("CONFIG_RAID6_PQ is still enabled in the final kernel .config.")
+    if grep -qE "^CONFIG_RAID6_PQ=[my]" ${B}/.config; then
+        bbfatal "CONFIG_RAID6_PQ is still enabled in the final kernel .config."
+    fi
 }
