@@ -1,3 +1,0 @@
-define KFEATURE_DESCRIPTION "Disable RAID6 PQ"
-
-kconf non-hardware cfg/disable-md-raid.cfg
