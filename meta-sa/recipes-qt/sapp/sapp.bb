@@ -9,6 +9,7 @@ SRC_URI = "file://CMakeLists.txt \
            file://main.qml \
            file://resources.qrc \
            file://app-init.sh \
+           file://boot_time_report.sh \
 "
 
 S = "${WORKDIR}"
@@ -31,4 +32,5 @@ do_install() {
 
     install -d ${D}/sbin
     install -m 0755 ${WORKDIR}/app-init.sh ${D}/sbin/init
+    install -m 0755 ${WORKDIR}/boot_time_report.sh ${D}${bindir}/boot_time_report.sh
 }
