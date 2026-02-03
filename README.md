@@ -91,63 +91,33 @@ cdy/
 
 ---
 
-## 🖥️ Sviluppo Qt/QML con QtCreator
+## 🖥️ Sviluppo Qt/QML con Qt Creator
 
 - **Apertura progetto**: importa il workspace dal `CMakeLists.txt` di root, che aggiunge le subdirectory `qmllib` e `sapp` e non richiede tool Yocto per configurare il progetto in IDE.
-- **Code model QML**: il `QML_IMPORT_PATH` è forzato su `meta-sa/recipes-qt/qmllib/files`, così QtCreator risolve `Sa.Graphics` usando gli stessi sorgenti che Yocto incorpora tramite `EXTERNALSRC`.
 - **Separazione build**: le build Yocto restano gestite da `yocto.sh` e dal template `TEMPLATECONF`; in IDE puoi usare un kit desktop per iterare su QML/C++ senza incrociare la toolchain cross. Per validare sul target ricompila i pacchetti o l’immagine (`bitbake sa-image-minimal`).
 
-### 🧪 Test desktop (QML2_IMPORT_PATH)
+### Desktop build & run (Qt Creator – Qt 6.7.3)
 
-Per verificare il modulo `Sa.Graphics` su desktop con lo stesso layout Yocto (`<prefix>/<libdir>/qml/Sa/Graphics`):
+La configurazione supportata usa il **kit Desktop Qt 6.7.3**. Di seguito i passaggi per una build ed esecuzione desktop con percorsi di esempio (usa placeholder come `<PROJECT_ROOT>`, `<SYSROOT_DESKTOP>`, `<BUILD_DIR>`).
 
-```bash
-cmake -S . -B build-desktop -DCMAKE_INSTALL_PREFIX=$HOME/cdy/sysroot
-cmake --build build-desktop
-cmake --install build-desktop
-```
+1) **Configurazione CMake (Build settings)**  
+   Aggiungi nelle opzioni di CMake:  
+   `-DCMAKE_INSTALL_PREFIX=<SYSROOT_DESKTOP>`  
 
-Avvio dell’app `sapp` (usa `lib64` se il tuo toolchain installa lì):
+2) **Step di build aggiuntivo (obbligatorio)**  
+   Aggiungi uno step custom dopo la build:  
+   `cmake --install %{buildDir}`  
+   Questo step è **necessario** per avere un layout runtime valido: l’applicazione e i moduli QML vengono installati nel prefisso e non vanno eseguiti direttamente dalla build directory.
 
-```bash
-QML2_IMPORT_PATH=$HOME/cdy/sysroot/lib/qml ./sapp
-```
+3) **Run configuration**  
+   Imposta l’eseguibile:  
+   `<SYSROOT_DESKTOP>/bin/sapp`
 
----
-
-## 🧩 Qt Creator (kit Desktop + kit Yocto)
-
-Per lavorare in modo fluido, usa **due sysroot separati** e due kit distinti:
-
-- **Desktop** → `~/cdy/sysroot-desktop`
-- **Yocto** → `~/cdy/sysroot-yocto`
-
-### Impostazioni consigliate per ciascun kit
-
-1) **CMake install prefix**  
-   - Desktop: `CMAKE_INSTALL_PREFIX=~/cdy/sysroot-desktop`  
-   - Yocto: `CMAKE_INSTALL_PREFIX=~/cdy/sysroot-yocto`
-
-2) **Build step**  
-   Assicurati che esista lo step **“CMake Install”**  
-   (oppure uno step custom equivalente a `cmake --install <buildDir>`).
-
-3) **Run Environment**  
-   - Desktop: `QML2_IMPORT_PATH=~/cdy/sysroot-desktop/lib/qml` (o `lib64` se necessario)  
-   - Yocto: `QML2_IMPORT_PATH=~/cdy/sysroot-yocto/lib/qml` (o `lib64` se necessario)
-
-### Nota importante (QML rosso nel kit Yocto)
-
-Il rosso nell’editor QML **non indica un errore reale**: è un limite di Qt Creator.  
-Il plugin QML del kit Yocto è compilato per **ARM**, mentre Qt Creator gira su **x86_64** e **non riesce a estrarre i metadata**: per questo segnala import in rosso.  
-**Build/deploy e runtime sul target non sono impattati**.
-
-### Workflow consigliato
-
-- **Kit Desktop** → editing QML (editor pulito)  
-- **Kit Yocto** → build/deploy sul target
-
----
+4) **Environment variables (solo per Run)**  
+   Aggiungi le variabili solo nella run configuration (non globali):  
+   `QML_IMPORT_PATH=<SYSROOT_DESKTOP>/lib/qml`  
+   `QML2_IMPORT_PATH=<SYSROOT_DESKTOP>/lib/qml`  
+   I moduli QML vengono caricati dal percorso installato, quindi il runtime deve puntare al path sotto `<SYSROOT_DESKTOP>`.
 
 ## 🚀 Open Youngtimer Lab
 
