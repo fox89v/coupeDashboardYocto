@@ -83,41 +83,57 @@ cdy/
 
 ---
 
-## 📦 Componenti Qt/QML inclusi
-
-- **Modulo QML `Sa.Graphics 1.0`** — sorgenti in `meta-sa/recipes-qt/qmllib/files` con `MyCircularGauge.qml` e `qmldir`; la ricetta installa il modulo in `/usr/lib/qml/Sa/Graphics` e dichiara `RDEPENDS` su `qtdeclarative-qmlplugins`, assicurando percorsi standard e dipendenze di runtime.
-- **Applicazione Qt6 `sapp`** — sorgenti in `meta-sa/recipes-qt/sapp/files` (CMake, `main.cpp`, `main.qml`, `app-init.sh`); importa `Sa.Graphics 1.0`, linka `Gui/Qml/Quick` e installa il binario in `/usr/bin` insieme allo script di init.
-- **Packagegroup e immagine** — `packagegroups-sa-qt` trascina modulo e app; l’immagine `sa-image-minimal` include Qt base/decl + packagegroup, mentre il template `local.conf.sample` abilita EGLFS e ottimizzazioni per QEMU/RPi.
-
----
-
 ## 🖥️ Sviluppo Qt/QML con Qt Creator
 
 - **Apertura progetto**: importa il workspace dal `CMakeLists.txt` di root, che aggiunge le subdirectory `qmllib` e `sapp` e non richiede tool Yocto per configurare il progetto in IDE.
 - **Separazione build**: le build Yocto restano gestite da `yocto.sh` e dal template `TEMPLATECONF`; in IDE puoi usare un kit desktop per iterare su QML/C++ senza incrociare la toolchain cross. Per validare sul target ricompila i pacchetti o l’immagine (`bitbake sa-image-minimal`).
 
-### Desktop build & run (Qt Creator – Qt 6.7.3)
+### Qt Creator (Desktop host)
 
-La configurazione supportata usa il **kit Desktop Qt 6.7.3**. Di seguito i passaggi per una build ed esecuzione desktop con percorsi di esempio (usa placeholder come `<PROJECT_ROOT>`, `<SYSROOT_DESKTOP>`, `<BUILD_DIR>`).
+Configurazione per kit **Desktop** in Qt Creator, con percorsi parametrizzati. Sostituire i placeholder con i valori reali del proprio host. Sono disponibili screenshot di riferimento nella cartella `helper/` (`qtCreatorHelp1.png` e `qtCreatorHelp2.png`).
 
-1) **Configurazione CMake (Build settings)**  
-   Aggiungi nelle opzioni di CMake:  
-   `-DCMAKE_INSTALL_PREFIX=<SYSROOT_DESKTOP>`  
+**Prerequisiti / variabili**
 
-2) **Step di build aggiuntivo (obbligatorio)**  
-   Aggiungi uno step custom dopo la build:  
-   `cmake --install %{buildDir}`  
-   Questo step è **necessario** per avere un layout runtime valido: l’applicazione e i moduli QML vengono installati nel prefisso e non vanno eseguiti direttamente dalla build directory.
+```
+<PROJECT_ROOT>     # root del repository
+<BUILD_DIR>        # build directory del kit
+<SYSROOT_DESKTOP>  # prefisso di install (es. .../sysroot-desktop)
+<QT_HOST_PREFIX>   # Qt host (es. .../Qt/6.7.3/gcc_64)
+```
 
-3) **Run configuration**  
-   Imposta l’eseguibile:  
-   `<SYSROOT_DESKTOP>/bin/sapp`
+**Build Settings (CMake)**
 
-4) **Environment variables (solo per Run)**  
-   Aggiungi le variabili solo nella run configuration (non globali):  
-   `QML_IMPORT_PATH=<SYSROOT_DESKTOP>/lib/qml`  
-   `QML2_IMPORT_PATH=<SYSROOT_DESKTOP>/lib/qml`  
-   I moduli QML vengono caricati dal percorso installato, quindi il runtime deve puntare al path sotto `<SYSROOT_DESKTOP>`.
+1) **Current Configuration**  
+   ```
+   CMAKE_INSTALL_PREFIX=<SYSROOT_DESKTOP>
+   ```
+
+2) **Build Steps → Custom Process Step**  
+   ```
+   Command: cmake
+   Arguments: --install %{buildDir}
+   Working directory: %{buildDir}
+   ```
+
+**Run Settings**
+
+1) **Run configuration**: Custom Executable  
+   ```
+   Executable: <SYSROOT_DESKTOP>/bin/sapp
+   Working directory: <SYSROOT_DESKTOP>
+   ```
+
+2) **Environment**  
+   ```
+   QT_HOME=<QT_HOST_PREFIX>
+   LD_LIBRARY_PATH=$QT_HOME/lib:<SYSROOT_DESKTOP>/lib:$LD_LIBRARY_PATH
+   QT_PLUGIN_PATH=$QT_HOME/plugins
+   QML_IMPORT_PATH=<SYSROOT_DESKTOP>/lib/qml
+   QML2_IMPORT_PATH=<SYSROOT_DESKTOP>/lib/qml
+   ```
+
+**Nota importante**  
+Lo step `cmake --install` è necessario perché l’applicazione e i moduli QML devono essere eseguiti dal layout installato sotto `<SYSROOT_DESKTOP>`. Le variabili di ambiente di run servono a risolvere Qt host e librerie quando si lancia l’eseguibile installato, e vanno impostate nella **Run configuration** di Qt Creator, non a livello globale di sistema.
 
 ## 🚀 Open Youngtimer Lab
 
