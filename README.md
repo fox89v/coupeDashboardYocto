@@ -45,15 +45,16 @@ Prerequisiti consigliati:
 - Facoltativo: ambiente **Docker** o VM dedicata per non contaminare il sistema host
 @@ -67,59 +69,80 @@ Menu interattivo:
 
-Suggerimento: per avviare QEMU in modalità sviluppo senza passare dal menu usa
-`./yocto.sh -d`, che salta direttamente all'opzione **3️⃣** con flag `SA_MODE=dev`.
+Suggerimento: per avviare QEMU senza passare dal menu usa `./yocto.sh -d`
+(modalità sviluppo con flag `SA_MODE=dev`) oppure `./yocto.sh -p` (modalità
+produzione, avvio diretto dell'opzione **3️⃣** senza flag).
 
 ### 📜 Cosa fa `yocto.sh` passo-passo
 
 Il file [`yocto.sh`](./yocto.sh) è interamente auto-consistente e gestisce sia le verifiche dell'host sia le operazioni di build. In sintesi:
 
 1. **Controllo dipendenze host** — verifica la presenza dei pacchetti `git`, `gawk`, `qemu-system-arm`, ecc. Se mancano, propone il comando `apt install` e consente di interrompere l'esecuzione in sicurezza.
-2. **Modalità interattiva o quick** — in assenza di `-d` mostra il menu numerato qui sopra; con `-d` esegue direttamente l'opzione **3️⃣** in modalità sviluppo (`SA_MODE=dev`).
+2. **Modalità interattiva o quick** — in assenza di `-d`/`-p` mostra il menu numerato qui sopra; con `-d` esegue direttamente l'opzione **3️⃣** in modalità sviluppo (`SA_MODE=dev`), con `-p` esegue direttamente l'opzione **3️⃣** in modalità produzione (senza flag).
 3. **Opzione 1: clonazione layer** — scarica i branch `scarthgap` di `poky`, `meta-openembedded`, `meta-raspberrypi` e il branch `6.7` di `meta-qt6`; crea inoltre le cartelle `downloads/` e `sstate-cache/` condivise tra le build.
 4. **Opzione 2: build immagine** — chiede il target (`qemuarm64` o `raspberrypi4-64`), prepara un build directory dedicato (`build-qemu` o `build-rpi4`) usando `TEMPLATECONF=../meta-sa/conf/templates/default` e aggiunge automaticamente i layer mancanti prima di lanciare `bitbake sa-image-minimal`. Gli output finiscono in `build-*/tmp-musl/deploy/images/<MACHINE>/`.
 5. **Opzione 3: avvio QEMU** — trova l’ultima immagine `qemuarm64` compilata e avvia `qemu-system-aarch64` con GPU virtio, input USB e porta SSH inoltrata (`hostfwd=tcp::2222-:22`). Il flag `SA_MODE=dev` abilita configurazioni di sviluppo nel boot argomento `console`.

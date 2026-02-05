@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 
 # ────────────────────────────────────────────────
-# ⚡ Quick DEV mode: ./yocto -d
+# ⚡ Quick modes: ./yocto -d (DEV) | ./yocto -p (PROD)
 # ────────────────────────────────────────────────
 if [ "$1" = "-d" ]; then
     quick_mode="dev"
+    main_choice="3"
+elif [ "$1" = "-p" ]; then
+    quick_mode="prod"
     main_choice="3"
 else
     quick_mode=""
@@ -49,7 +52,7 @@ check_deps
 # ────────────────────────────────────────────────
 # 🚀 Menu (solo se NON quick mode)
 # ────────────────────────────────────────────────
-if [ "$quick_mode" != "dev" ]; then
+if [ -z "$quick_mode" ]; then
     echo ""
     echo "🚀 Yocto Project Manager"
     echo "────────────────────────────────────────────"
@@ -144,17 +147,20 @@ if [ "$main_choice" = "3" ]; then
 
   # scelta DEV/PROD
   if [ "$quick_mode" = "dev" ]; then
-      MODE_FLAG="SA_MODE=dev"
-      echo "🔧 Quick start in DEV mode"
+    MODE_FLAG="SA_MODE=dev"
+    echo "🔧 Quick start in DEV mode"
+  elif [ "$quick_mode" = "prod" ]; then
+    MODE_FLAG=""
+    echo "🚗 Quick start in PROD mode"
   else
-      read -p "Choose mode [d=DEV / p=PROD]: " mode
-      if [ "$mode" = "d" ]; then
-          MODE_FLAG="SA_MODE=dev"
-          echo "🔧 Starting in DEV mode"
-      else
-          MODE_FLAG=""
-          echo "🚗 Starting in PROD mode"
-      fi
+    read -p "Choose mode [d=DEV / p=PROD]: " mode
+    if [ "$mode" = "d" ]; then
+      MODE_FLAG="SA_MODE=dev"
+      echo "🔧 Starting in DEV mode"
+    else
+      MODE_FLAG=""
+      echo "🚗 Starting in PROD mode"
+    fi
   fi
 
   CONF=$(ls -t build-qemu/tmp-musl/deploy/images/qemuarm64/*.qemuboot.conf | head -n 1)
