@@ -17,6 +17,7 @@ set_target_properties(sa_graphics_module PROPERTIES
 qt_add_qml_module(sa_graphics_module
     URI Sa.Graphics
     VERSION 1.0
+    NO_GENERATE_QMLDIR
     QML_FILES
         Sa/Graphics/MyCircularGauge.qml
     SOURCES
@@ -36,15 +37,34 @@ install(TARGETS sa_graphics_module
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
-# Plugin QML (deve stare nel modulo QML)
+# Plugin QML (dentro al modulo QML)
 install(TARGETS sa_graphics_moduleplugin
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/qml/Sa/Graphics
 )
 
-# QML module files
+# QML file
 install(FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/Sa/Graphics/qmldir
     ${CMAKE_CURRENT_SOURCE_DIR}/Sa/Graphics/MyCircularGauge.qml
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/qml/Sa/Graphics
+)
+
+# QML typeinfo per editor/tooling (evita il load del plugin cross)
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/sa_graphics_module.qmltypes
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/qml/Sa/Graphics
+)
+
+# qmldir generato da CMake (NO file manuale nel repo)
+set(_QMLDIR_OUT "${CMAKE_CURRENT_BINARY_DIR}/qmldir")
+file(WRITE "${_QMLDIR_OUT}"
+"module Sa.Graphics\n"
+"plugin sa_graphics_moduleplugin\n"
+"typeinfo sa_graphics_module.qmltypes\n"
+"MyCircularGauge 1.0 MyCircularGauge.qml\n"
+)
+
+install(FILES
+    "${_QMLDIR_OUT}"
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/qml/Sa/Graphics
 )
 

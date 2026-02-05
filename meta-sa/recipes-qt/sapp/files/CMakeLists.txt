@@ -1,5 +1,7 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.21)
 project(sapp LANGUAGES CXX)
+
+include(GNUInstallDirs)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -22,4 +24,8 @@ target_link_libraries(sapp
 
 qt_import_qml_plugins(sapp)
 
-install(TARGETS sapp RUNTIME DESTINATION bin)
+set_target_properties(sapp PROPERTIES
+  INSTALL_RPATH "\$ORIGIN/../lib"
+)
+
+install(TARGETS sapp RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
